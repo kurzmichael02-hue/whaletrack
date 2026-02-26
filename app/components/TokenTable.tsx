@@ -15,7 +15,7 @@ export default function TokenTable() {
   ]);
 
   useEffect(() => {
-    const ws = new WebSocket("ws://localhost:4000");
+    const ws = new WebSocket("wss://whaletrack-backend.onrender.com");
 
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
