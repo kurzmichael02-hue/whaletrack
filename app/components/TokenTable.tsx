@@ -18,9 +18,11 @@ export default function TokenTable() {
     const ws = new WebSocket("wss://whaletrack-backend.onrender.com");
 
     ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      setTokens(data);
-    };
+  const msg = JSON.parse(event.data);
+  if (msg.type === "prices") {
+    setTokens(msg.data);
+  }
+};
 
     return () => ws.close();
   }, []);
