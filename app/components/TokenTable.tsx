@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 type Token = {
   symbol: string;
@@ -9,22 +9,41 @@ type Token = {
 
 export default function TokenTable() {
   const [tokens, setTokens] = useState<Token[]>([
-    { symbol: "BTC", price: 67200 },
-    { symbol: "ETH", price: 3480 },
-    { symbol: "SOL", price: 172 },
+    { symbol: "BTC", price: 0 },
+    { symbol: "ETH", price: 0 },
+    { symbol: "SOL", price: 0 },
   ]);
+  const wsRef = useRef<WebSocket | null>(null);
 
   useEffect(() => {
-    const ws = new WebSocket("wss://whaletrack-backend.onrender.com");
+    // Keep-alive: ping backend every 5 minutes
+    const keepAlive = setInterval(() => {
+      fetch("https://whaletrack-backend.onrender.com/prices").catch(() => {});
+    }, 5 * 60 * 1000);
 
-    ws.onmessage = (event) => {
-  const msg = JSON.parse(event.data);
-  if (msg.type === "prices") {
-    setTokens(msg.data);
-  }
-};
+    function connect() {
+      const ws = new WebSocket("wss://whaletrack-backend.onrender.com");
+      wsRef.current = ws;
 
-    return () => ws.close();
+      ws.onmessage = (event) => {
+        const msg = JSON.parse(event.data);
+        if (msg.type === "prices") {
+          setTokens(msg.data);
+        }
+      };
+
+      ws.onclose = () => {
+        // Reconnect after 3 seconds
+        setTimeout(connect, 3000);
+      };
+    }
+
+    connect();
+
+    return () => {
+      clearInterval(keepAlive);
+      wsRef.current?.close();
+    };
   }, []);
 
   return (
