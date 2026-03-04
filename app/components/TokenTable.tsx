@@ -60,7 +60,7 @@ export default function TokenTable() {
           {tokens.map((token) => (
             <tr key={token.symbol} className="border-b border-gray-800">
               <td className="py-3 text-white">{token.symbol}</td>
-              <td className="text-green-400">${token.price.toLocaleString()}</td>
+              <td className="text-green-400">${(token.price ?? 0).toLocaleString()}</td>
             </tr>
           ))}
         </tbody>
