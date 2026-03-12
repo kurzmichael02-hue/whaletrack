@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 
 type Transaction = {
   hash: string;
-  from: string;
-  to: string;
+  type: "ETH" | "TOKEN";
+  token: string;
   value: string;
   timestamp: string;
 };
@@ -17,6 +17,15 @@ type Whale = {
 };
 
 const WHALE_COLORS = ["#F7931A", "#627EEA", "#9945FF"];
+
+const TOKEN_COLORS: Record<string, string> = {
+  ETH: "#627EEA",
+  USDT: "#26A17B",
+  USDC: "#2775CA",
+  WETH: "#627EEA",
+  WBTC: "#F7931A",
+  DAI: "#F5AC37",
+};
 
 export default function WhalesPage() {
   const [whales, setWhales] = useState<Whale[]>([]);
@@ -69,20 +78,30 @@ export default function WhalesPage() {
               <thead>
                 <tr className="text-gray-600 text-xs uppercase tracking-widest">
                   <th className="text-left px-6 py-3">Hash</th>
-                  <th className="text-left px-6 py-3">Value</th>
+                  <th className="text-left px-6 py-3">Token</th>
+                  <th className="text-left px-6 py-3">Amount</th>
                   <th className="text-left px-6 py-3">Date</th>
                 </tr>
               </thead>
               <tbody>
-                {whale.transactions.map((tx) => (
-                  <tr key={tx.hash} className="border-t transition-colors hover:bg-white/2" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
-                    <td className="px-6 py-3 font-mono text-xs text-blue-400">{tx.hash.slice(0, 16)}...</td>
-                    <td className="px-6 py-3">
-                      <span className="text-green-400 font-medium">{tx.value} ETH</span>
-                    </td>
-                    <td className="px-6 py-3 text-gray-500 text-xs">{new Date(tx.timestamp).toLocaleDateString("de-DE")}</td>
+                {whale.transactions.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="px-6 py-6 text-gray-600 text-sm text-center">No significant transactions found</td>
                   </tr>
-                ))}
+                ) : (
+                  whale.transactions.map((tx) => (
+                    <tr key={tx.hash} className="border-t transition-colors hover:bg-white/2" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
+                      <td className="px-6 py-3 font-mono text-xs text-blue-400">{tx.hash.slice(0, 16)}...</td>
+                      <td className="px-6 py-3">
+                        <span className="px-2 py-0.5 rounded text-xs font-bold" style={{ background: `${TOKEN_COLORS[tx.token] ?? "#6b7280"}20`, color: TOKEN_COLORS[tx.token] ?? "#6b7280" }}>
+                          {tx.token}
+                        </span>
+                      </td>
+                      <td className="px-6 py-3 text-green-400 font-medium">{tx.value} {tx.token}</td>
+                      <td className="px-6 py-3 text-gray-500 text-xs">{new Date(tx.timestamp).toLocaleDateString("de-DE")}</td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
