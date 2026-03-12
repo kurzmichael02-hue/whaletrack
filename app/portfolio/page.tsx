@@ -32,88 +32,118 @@ const MOCK_TRANSACTIONS: Transaction[] = [
   { hash: "0xghi789", type: "buy", symbol: "SOL", amount: 45, price: 60, date: "2024-10-20" },
 ];
 
-const BUY_PRICES: Record<string, number> = {
-  BTC: 62000,
-  ETH: 1800,
-  SOL: 60,
+const BUY_PRICES: Record<string, number> = { BTC: 62000, ETH: 1800, SOL: 60 };
+
+const TOKEN_COLORS: Record<string, string> = {
+  BTC: "#F7931A",
+  ETH: "#627EEA",
+  SOL: "#9945FF",
+};
+
+const TOKEN_ICONS: Record<string, string> = {
+  BTC: "₿",
+  ETH: "Ξ",
+  SOL: "◎",
 };
 
 export default function PortfolioPage() {
   const [holdings, setHoldings] = useState<Token[]>(MOCK_HOLDINGS);
   const [totalValue, setTotalValue] = useState(0);
   const [totalPnl, setTotalPnl] = useState(0);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     async function loadPrices() {
-      const res = await fetch("https://whaletrack-backend.onrender.com/prices");
-      const prices = await res.json() as { symbol: string; price: number }[];
+      try {
+        const res = await fetch("https://whaletrack-backend.onrender.com/prices");
+        const prices = await res.json() as { symbol: string; price: number }[];
+        const priceMap: Record<string, number> = {};
+        prices.forEach((p) => { priceMap[p.symbol] = p.price; });
 
-      const priceMap: Record<string, number> = {};
-      prices.forEach((p) => { priceMap[p.symbol] = p.price; });
+        const updated = MOCK_HOLDINGS.map((h) => {
+          const currentPrice = priceMap[h.symbol] ?? 0;
+          const value = h.amount * currentPrice;
+          const buyValue = h.amount * (BUY_PRICES[h.symbol] ?? 0);
+          const pnl = value - buyValue;
+          const pnlPercent = buyValue > 0 ? (pnl / buyValue) * 100 : 0;
+          return { ...h, price: currentPrice, value, pnl, pnlPercent };
+        });
 
-      const updated = MOCK_HOLDINGS.map((h) => {
-        const currentPrice = priceMap[h.symbol] ?? 0;
-        const value = h.amount * currentPrice;
-        const buyValue = h.amount * (BUY_PRICES[h.symbol] ?? 0);
-        const pnl = value - buyValue;
-        const pnlPercent = buyValue > 0 ? (pnl / buyValue) * 100 : 0;
-        return { ...h, price: currentPrice, value, pnl, pnlPercent };
-      });
-
-      const total = updated.reduce((sum, h) => sum + h.value, 0);
-      const totalPnlVal = updated.reduce((sum, h) => sum + h.pnl, 0);
-      setHoldings(updated);
-      setTotalValue(total);
-      setTotalPnl(totalPnlVal);
+        setHoldings(updated);
+        setTotalValue(updated.reduce((s, h) => s + h.value, 0));
+        setTotalPnl(updated.reduce((s, h) => s + h.pnl, 0));
+      } catch (e) {
+        console.error(e);
+      }
+      setLoaded(true);
     }
-
     loadPrices();
   }, []);
 
-  return (
-    <div className="p-6 space-y-6">
-      <h2 className="text-2xl font-bold text-white">Portfolio</h2>
+  const fmt = (n: number) => n.toLocaleString(undefined, { maximumFractionDigits: 2 });
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-3 gap-4">
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
-          <p className="text-gray-400 text-sm">Total Value</p>
-          <p className="text-white text-2xl font-bold">${totalValue.toLocaleString(undefined, { maximumFractionDigits: 2 })}</p>
+  return (
+    <div className="p-8 space-y-8 min-h-screen" style={{ background: "linear-gradient(135deg, #0a0f1e 0%, #0d1529 50%, #0a0f1e 100%)" }}>
+      
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-3xl font-bold text-white tracking-tight">Portfolio</h2>
+          <p className="text-gray-500 text-sm mt-1">Your crypto holdings overview</p>
         </div>
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
-          <p className="text-gray-400 text-sm">Total PnL</p>
-          <p className={`text-2xl font-bold ${totalPnl >= 0 ? "text-green-400" : "text-red-400"}`}>
-            {totalPnl >= 0 ? "+" : ""}${totalPnl.toLocaleString(undefined, { maximumFractionDigits: 2 })}
-          </p>
-        </div>
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
-          <p className="text-gray-400 text-sm">Assets</p>
-          <p className="text-white text-2xl font-bold">{holdings.length}</p>
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium" style={{ background: "rgba(16, 185, 129, 0.1)", border: "1px solid rgba(16, 185, 129, 0.2)", color: "#10b981" }}>
+          <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse inline-block" />
+          Live Prices
         </div>
       </div>
 
+      {/* Summary Cards */}
+      <div className="grid grid-cols-3 gap-4">
+        {[
+          { label: "Total Value", value: `$${fmt(totalValue)}`, color: "#fff" },
+          { label: "Total PnL", value: `${totalPnl >= 0 ? "+" : ""}$${fmt(totalPnl)}`, color: totalPnl >= 0 ? "#10b981" : "#ef4444" },
+          { label: "Assets", value: `${holdings.length}`, color: "#fff" },
+        ].map((card) => (
+          <div key={card.label} className="rounded-2xl p-5" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", backdropFilter: "blur(10px)" }}>
+            <p className="text-gray-500 text-xs uppercase tracking-widest mb-2">{card.label}</p>
+            <p className="text-2xl font-bold" style={{ color: card.color }}>{loaded ? card.value : "—"}</p>
+          </div>
+        ))}
+      </div>
+
       {/* Holdings */}
-      <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
-        <h3 className="text-white font-semibold mb-4">Token Holdings</h3>
-        <table className="w-full text-sm">
+      <div className="rounded-2xl overflow-hidden" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
+        <div className="px-6 py-4 border-b border-white/5">
+          <h3 className="text-white font-semibold">Token Holdings</h3>
+        </div>
+        <table className="w-full">
           <thead>
-            <tr className="text-gray-400 border-b border-gray-800">
-              <th className="text-left py-2">Token</th>
-              <th className="text-left py-2">Amount</th>
-              <th className="text-left py-2">Price</th>
-              <th className="text-left py-2">Value</th>
-              <th className="text-left py-2">PnL</th>
+            <tr className="text-gray-500 text-xs uppercase tracking-widest">
+              <th className="text-left px-6 py-3">Asset</th>
+              <th className="text-left px-6 py-3">Amount</th>
+              <th className="text-left px-6 py-3">Price</th>
+              <th className="text-left px-6 py-3">Value</th>
+              <th className="text-left px-6 py-3">PnL</th>
             </tr>
           </thead>
           <tbody>
-            {holdings.map((h) => (
-              <tr key={h.symbol} className="border-b border-gray-800">
-                <td className="py-3 text-white font-semibold">{h.symbol}</td>
-                <td className="text-gray-300">{h.amount}</td>
-                <td className="text-gray-300">${h.price.toLocaleString()}</td>
-                <td className="text-white">${h.value.toLocaleString(undefined, { maximumFractionDigits: 2 })}</td>
-                <td className={h.pnl >= 0 ? "text-green-400" : "text-red-400"}>
-                  {h.pnl >= 0 ? "+" : ""}${h.pnl.toLocaleString(undefined, { maximumFractionDigits: 2 })} ({h.pnlPercent.toFixed(1)}%)
+            {holdings.map((h, i) => (
+              <tr key={h.symbol} className="border-t border-white/5 hover:bg-white/2 transition-colors" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
+                <td className="px-6 py-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl flex items-center justify-center text-lg font-bold" style={{ background: `${TOKEN_COLORS[h.symbol]}20`, color: TOKEN_COLORS[h.symbol] }}>
+                      {TOKEN_ICONS[h.symbol]}
+                    </div>
+                    <span className="text-white font-semibold">{h.symbol}</span>
+                  </div>
+                </td>
+                <td className="px-6 py-4 text-gray-400">{h.amount}</td>
+                <td className="px-6 py-4 text-gray-300">{loaded ? `$${fmt(h.price)}` : "—"}</td>
+                <td className="px-6 py-4 text-white font-medium">{loaded ? `$${fmt(h.value)}` : "—"}</td>
+                <td className="px-6 py-4">
+                  <span className={`px-2.5 py-1 rounded-lg text-xs font-semibold ${h.pnl >= 0 ? "text-green-400" : "text-red-400"}`} style={{ background: h.pnl >= 0 ? "rgba(16,185,129,0.1)" : "rgba(239,68,68,0.1)" }}>
+                    {loaded ? `${h.pnl >= 0 ? "+" : ""}$${fmt(h.pnl)} (${h.pnlPercent.toFixed(1)}%)` : "—"}
+                  </span>
                 </td>
               </tr>
             ))}
@@ -122,28 +152,39 @@ export default function PortfolioPage() {
       </div>
 
       {/* Transaction History */}
-      <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
-        <h3 className="text-white font-semibold mb-4">Transaction History</h3>
-        <table className="w-full text-sm">
+      <div className="rounded-2xl overflow-hidden" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
+        <div className="px-6 py-4 border-b border-white/5">
+          <h3 className="text-white font-semibold">Transaction History</h3>
+        </div>
+        <table className="w-full">
           <thead>
-            <tr className="text-gray-400 border-b border-gray-800">
-              <th className="text-left py-2">Hash</th>
-              <th className="text-left py-2">Type</th>
-              <th className="text-left py-2">Token</th>
-              <th className="text-left py-2">Amount</th>
-              <th className="text-left py-2">Price</th>
-              <th className="text-left py-2">Date</th>
+            <tr className="text-gray-500 text-xs uppercase tracking-widest">
+              <th className="text-left px-6 py-3">Hash</th>
+              <th className="text-left px-6 py-3">Type</th>
+              <th className="text-left px-6 py-3">Asset</th>
+              <th className="text-left px-6 py-3">Amount</th>
+              <th className="text-left px-6 py-3">Price</th>
+              <th className="text-left px-6 py-3">Date</th>
             </tr>
           </thead>
           <tbody>
             {MOCK_TRANSACTIONS.map((tx) => (
-              <tr key={tx.hash} className="border-b border-gray-800">
-                <td className="py-3 text-blue-400 font-mono text-xs">{tx.hash.slice(0, 10)}...</td>
-                <td className={tx.type === "buy" ? "text-green-400" : "text-red-400"}>{tx.type.toUpperCase()}</td>
-                <td className="text-white">{tx.symbol}</td>
-                <td className="text-gray-300">{tx.amount}</td>
-                <td className="text-gray-300">${tx.price.toLocaleString()}</td>
-                <td className="text-gray-400">{tx.date}</td>
+              <tr key={tx.hash} className="border-t transition-colors" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
+                <td className="px-6 py-4 font-mono text-xs text-blue-400">{tx.hash.slice(0, 14)}...</td>
+                <td className="px-6 py-4">
+                  <span className={`px-2.5 py-1 rounded-lg text-xs font-bold ${tx.type === "buy" ? "text-green-400" : "text-red-400"}`} style={{ background: tx.type === "buy" ? "rgba(16,185,129,0.1)" : "rgba(239,68,68,0.1)" }}>
+                    {tx.type.toUpperCase()}
+                  </span>
+                </td>
+                <td className="px-6 py-4">
+                  <div className="flex items-center gap-2">
+                    <span style={{ color: TOKEN_COLORS[tx.symbol] }}>{TOKEN_ICONS[tx.symbol]}</span>
+                    <span className="text-white">{tx.symbol}</span>
+                  </div>
+                </td>
+                <td className="px-6 py-4 text-gray-400">{tx.amount}</td>
+                <td className="px-6 py-4 text-gray-300">${tx.price.toLocaleString()}</td>
+                <td className="px-6 py-4 text-gray-500 text-sm">{tx.date}</td>
               </tr>
             ))}
           </tbody>
