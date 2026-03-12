@@ -18,8 +18,12 @@ type Trade = {
 const MOCK_TRADES: Trade[] = [
   { id: "1", pair: "BTC/USDT", type: "long", entry: 62000, current: 84000, size: 0.12, pnl: 2640, pnlPercent: 35.5, status: "open", date: "2024-12-01" },
   { id: "2", pair: "ETH/USDT", type: "long", entry: 1800, current: 2100, size: 2.5, pnl: 750, pnlPercent: 16.7, status: "open", date: "2024-11-15" },
-  { id: "3", pair: "SOL/USDT", type: "short", entry: 120, current: 95, size: 10, pnl: 250, pnlPercent: 20.8, status: "closed", date: "2024-11-01" },
+  { id: "3", pair: "SOL/USDT", type: "long", entry: 60, current: 87, size: 45, pnl: 1215, pnlPercent: 45.0, status: "open", date: "2024-10-20" },
   { id: "4", pair: "BTC/USDT", type: "short", entry: 70000, current: 84000, size: 0.05, pnl: -700, pnlPercent: -20.0, status: "closed", date: "2024-10-15" },
+  { id: "5", pair: "SOL/USDT", type: "short", entry: 120, current: 95, size: 10, pnl: 250, pnlPercent: 20.8, status: "closed", date: "2024-11-01" },
+  { id: "6", pair: "ETH/USDT", type: "short", entry: 2400, current: 2100, size: 1.0, pnl: 300, pnlPercent: 12.5, status: "closed", date: "2024-09-10" },
+  { id: "7", pair: "BTC/USDT", type: "long", entry: 42000, current: 62000, size: 0.08, pnl: 1600, pnlPercent: 47.6, status: "closed", date: "2024-08-01" },
+  { id: "8", pair: "SOL/USDT", type: "long", entry: 30, current: 60, size: 100, pnl: 3000, pnlPercent: 100.0, status: "closed", date: "2024-07-15" },
 ];
 
 const PAIR_COLORS: Record<string, string> = {
@@ -34,25 +38,23 @@ export default function TradesPage() {
   const filtered = MOCK_TRADES.filter((t) => filter === "all" || t.status === filter);
   const openPnl = MOCK_TRADES.filter((t) => t.status === "open").reduce((s, t) => s + t.pnl, 0);
   const totalPnl = MOCK_TRADES.reduce((s, t) => s + t.pnl, 0);
-  const winRate = Math.round((MOCK_TRADES.filter((t) => t.pnl > 0).length / MOCK_TRADES.length) * 100);
-
+  const wins = MOCK_TRADES.filter((t) => t.pnl > 0).length;
+  const winRate = Math.round((wins / MOCK_TRADES.length) * 100);
   const fmt = (n: number) => n.toLocaleString(undefined, { maximumFractionDigits: 2 });
 
   return (
     <div className="p-8 space-y-8 min-h-screen" style={{ background: "linear-gradient(135deg, #0a0f1e 0%, #0d1529 50%, #0a0f1e 100%)" }}>
-
-      {/* Header */}
       <div>
         <h2 className="text-3xl font-bold text-white tracking-tight">Trades</h2>
         <p className="text-gray-500 text-sm mt-1">Your trading history and open positions</p>
       </div>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-4 gap-4">
         {[
           { label: "Open PnL", value: `${openPnl >= 0 ? "+" : ""}$${fmt(openPnl)}`, color: openPnl >= 0 ? "#10b981" : "#ef4444" },
           { label: "Total PnL", value: `${totalPnl >= 0 ? "+" : ""}$${fmt(totalPnl)}`, color: totalPnl >= 0 ? "#10b981" : "#ef4444" },
           { label: "Win Rate", value: `${winRate}%`, color: winRate >= 50 ? "#10b981" : "#ef4444" },
+          { label: "Total Trades", value: `${MOCK_TRADES.length}`, color: "#fff" },
         ].map((card) => (
           <div key={card.label} className="rounded-2xl p-5 relative overflow-hidden" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
             <div className="absolute inset-0 opacity-5" style={{ background: "radial-gradient(circle at top right, rgba(16,185,129,0.4), transparent 70%)" }} />
@@ -62,29 +64,18 @@ export default function TradesPage() {
         ))}
       </div>
 
-      {/* Filter Tabs */}
       <div className="flex gap-2">
         {(["all", "open", "closed"] as const).map((f) => (
-          <button
-            key={f}
-            onClick={() => setFilter(f)}
-            className="px-4 py-1.5 rounded-lg text-sm font-medium transition-all capitalize"
-            style={{
-              background: filter === f ? "rgba(16,185,129,0.12)" : "rgba(255,255,255,0.03)",
-              border: filter === f ? "1px solid rgba(16,185,129,0.25)" : "1px solid rgba(255,255,255,0.07)",
-              color: filter === f ? "#10b981" : "#6b7280",
-            }}
-          >
-            {f}
+          <button key={f} onClick={() => setFilter(f)} className="px-4 py-1.5 rounded-lg text-sm font-medium transition-all capitalize" style={{ background: filter === f ? "rgba(16,185,129,0.12)" : "rgba(255,255,255,0.03)", border: filter === f ? "1px solid rgba(16,185,129,0.25)" : "1px solid rgba(255,255,255,0.07)", color: filter === f ? "#10b981" : "#6b7280" }}>
+            {f} {f === "all" ? `(${MOCK_TRADES.length})` : f === "open" ? `(${MOCK_TRADES.filter(t => t.status === "open").length})` : `(${MOCK_TRADES.filter(t => t.status === "closed").length})`}
           </button>
         ))}
       </div>
 
-      {/* Trades Table */}
       <div className="rounded-2xl overflow-hidden" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
         <table className="w-full">
           <thead>
-            <tr className="text-gray-500 text-xs uppercase tracking-widest">
+            <tr className="text-gray-600 text-xs uppercase tracking-widest">
               <th className="text-left px-6 py-3">Pair</th>
               <th className="text-left px-6 py-3">Type</th>
               <th className="text-left px-6 py-3">Entry</th>
@@ -106,7 +97,7 @@ export default function TradesPage() {
                 </td>
                 <td className="px-6 py-4">
                   <span className="px-2.5 py-1 rounded-lg text-xs font-bold" style={{ background: trade.type === "long" ? "rgba(16,185,129,0.1)" : "rgba(239,68,68,0.1)", color: trade.type === "long" ? "#10b981" : "#ef4444" }}>
-                    {trade.type.toUpperCase()}
+                    {trade.type === "long" ? "▲ LONG" : "▼ SHORT"}
                   </span>
                 </td>
                 <td className="px-6 py-4 text-gray-400">${fmt(trade.entry)}</td>
