@@ -16,6 +16,8 @@ type Whale = {
   transactions: Transaction[];
 };
 
+const WHALE_COLORS = ["#F7931A", "#627EEA", "#9945FF"];
+
 export default function WhalesPage() {
   const [whales, setWhales] = useState<Whale[]>([]);
   const [loading, setLoading] = useState(true);
@@ -29,39 +31,63 @@ export default function WhalesPage() {
       });
   }, []);
 
-  if (loading) return <div className="text-white p-8">Loading whale data...</div>;
+  if (loading) return (
+    <div className="flex items-center justify-center h-64">
+      <div className="flex items-center gap-3 text-gray-500">
+        <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse inline-block" />
+        Loading whale data...
+      </div>
+    </div>
+  );
 
   return (
-    <div className="p-6">
-      <h2 className="text-2xl font-bold text-white mb-6">🐋 Whale Wallets</h2>
-      {whales.map((whale) => (
-        <div key={whale.address} className="bg-gray-900 border border-gray-800 rounded-xl p-4 mb-6">
-          <h3 className="text-lg font-semibold text-green-400 mb-1">{whale.name}</h3>
-          <p className="text-gray-500 text-xs mb-4">{whale.address}</p>
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="text-gray-400 border-b border-gray-800">
-                <th className="text-left py-2">Hash</th>
-                <th className="text-left py-2">Value (ETH)</th>
-                <th className="text-left py-2">Time</th>
-              </tr>
-            </thead>
-            <tbody>
-              {whale.transactions.map((tx) => (
-                <tr key={tx.hash} className="border-b border-gray-800">
-                  <td className="py-2 text-blue-400 font-mono text-xs">
-                    {tx.hash.slice(0, 12)}...
-                  </td>
-                  <td className="text-green-400">{tx.value} ETH</td>
-                  <td className="text-gray-400 text-xs">
-                    {new Date(tx.timestamp).toLocaleDateString()}
-                  </td>
+    <div className="p-8 space-y-6 min-h-screen" style={{ background: "linear-gradient(135deg, #0a0f1e 0%, #0d1529 50%, #0a0f1e 100%)" }}>
+      <div>
+        <h2 className="text-3xl font-bold text-white tracking-tight">Whale Tracker</h2>
+        <p className="text-gray-500 text-sm mt-1">Monitoring top Ethereum wallets in real-time</p>
+      </div>
+
+      <div className="grid gap-6">
+        {whales.map((whale, i) => (
+          <div key={whale.address} className="rounded-2xl overflow-hidden" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
+            <div className="px-6 py-4 flex items-center justify-between" style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-xl flex items-center justify-center text-lg" style={{ background: `${WHALE_COLORS[i]}20`, color: WHALE_COLORS[i] }}>
+                  🐋
+                </div>
+                <div>
+                  <h3 className="text-white font-semibold">{whale.name}</h3>
+                  <p className="text-gray-600 text-xs font-mono">{whale.address.slice(0, 18)}...{whale.address.slice(-6)}</p>
+                </div>
+              </div>
+              <span className="text-xs px-2.5 py-1 rounded-full" style={{ background: "rgba(16,185,129,0.1)", color: "#10b981", border: "1px solid rgba(16,185,129,0.2)" }}>
+                {whale.transactions.length} txns
+              </span>
+            </div>
+
+            <table className="w-full">
+              <thead>
+                <tr className="text-gray-600 text-xs uppercase tracking-widest">
+                  <th className="text-left px-6 py-3">Hash</th>
+                  <th className="text-left px-6 py-3">Value</th>
+                  <th className="text-left px-6 py-3">Date</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      ))}
+              </thead>
+              <tbody>
+                {whale.transactions.map((tx) => (
+                  <tr key={tx.hash} className="border-t transition-colors hover:bg-white/2" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
+                    <td className="px-6 py-3 font-mono text-xs text-blue-400">{tx.hash.slice(0, 16)}...</td>
+                    <td className="px-6 py-3">
+                      <span className="text-green-400 font-medium">{tx.value} ETH</span>
+                    </td>
+                    <td className="px-6 py-3 text-gray-500 text-xs">{new Date(tx.timestamp).toLocaleDateString("de-DE")}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
