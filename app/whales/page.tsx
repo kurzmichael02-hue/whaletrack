@@ -23,7 +23,7 @@ export default function WhalesPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("https://whaletrack-backend.onrender.com/whales")
+    fetch("/api/whales")
       .then((res) => res.json())
       .then((data) => {
         setWhales(data);
