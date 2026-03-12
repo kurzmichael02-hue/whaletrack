@@ -54,29 +54,39 @@ export default function PortfolioPage() {
 
   useEffect(() => {
     async function loadPrices() {
-      try {
-        const res = await fetch("https://whaletrack-backend.onrender.com/prices");
-        const prices = await res.json() as { symbol: string; price: number }[];
-        const priceMap: Record<string, number> = {};
-        prices.forEach((p) => { priceMap[p.symbol] = p.price; });
+  try {
+    const symbols = ["BTCUSDT", "ETHUSDT", "SOLUSDT"];
+    const results = await Promise.all(
+      symbols.map((s) =>
+        fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${s}`)
+          .then((r) => r.json())
+      )
+    );
+    const priceMap: Record<string, number> = {
+      BTC: parseFloat(results[0].price),
+      ETH: parseFloat(results[1].price),
+      SOL: parseFloat(results[2].price),
+    };
 
-        const updated = MOCK_HOLDINGS.map((h) => {
-          const currentPrice = priceMap[h.symbol] ?? 0;
-          const value = h.amount * currentPrice;
-          const buyValue = h.amount * (BUY_PRICES[h.symbol] ?? 0);
-          const pnl = value - buyValue;
-          const pnlPercent = buyValue > 0 ? (pnl / buyValue) * 100 : 0;
-          return { ...h, price: currentPrice, value, pnl, pnlPercent };
-        });
+    const updated = MOCK_HOLDINGS.map((h) => {
+      const currentPrice = priceMap[h.symbol] ?? 0;
+      const value = h.amount * currentPrice;
+      const buyValue = h.amount * (BUY_PRICES[h.symbol] ?? 0);
+      const pnl = value - buyValue;
+      const pnlPercent = buyValue > 0 ? (pnl / buyValue) * 100 : 0;
+      return { ...h, price: currentPrice, value, pnl, pnlPercent };
+    });
 
-        setHoldings(updated);
-        setTotalValue(updated.reduce((s, h) => s + h.value, 0));
-        setTotalPnl(updated.reduce((s, h) => s + h.pnl, 0));
-      } catch (e) {
-        console.error(e);
-      }
-      setLoaded(true);
-    }
+    setHoldings(updated);
+    setTotalValue(updated.reduce((s, h) => s + h.value, 0));
+    setTotalPnl(updated.reduce((s, h) => s + h.pnl, 0));
+  } catch (e) {
+    console.error(e);
+  }
+  setLoaded(true);
+}
+
+
     loadPrices();
   }, []);
 
