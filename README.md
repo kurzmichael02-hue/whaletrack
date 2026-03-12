@@ -1,30 +1,46 @@
 # WhaleTrack 🐋
 
-A real-time Web3 trading dashboard that tracks live cryptocurrency prices
-and whale wallet transactions on-chain.
+Real-time crypto dashboard. Tracks live prices and on-chain whale wallet activity.
 
-## Tech Stack
-- **Framework:** Next.js + TypeScript
-- **Styling:** TailwindCSS
-- **Real-time:** WebSocket
-- **Blockchain:** ethers.js
-- **Deployment:** Vercel
+## Stack
+
+- Next.js + TypeScript
+- TailwindCSS
+- WebSocket (live price streaming)
+- Etherscan V2 API (on-chain data)
+- Binance API (market prices)
+- Vercel (frontend) + Render (backend)
 
 ## Features
-- Live cryptocurrency price streaming
-- Whale wallet transaction monitoring
-- DeFi position tracking with PnL calculation
-- Smart contract interaction on testnet
-- Responsive dashboard UI
 
-## Getting Started
+- Live BTC, ETH, SOL price feed via WebSocket
+- Whale wallet monitoring (Binance, Vitalik, Justin Sun)
+- Portfolio tracking with PnL calculation
+- Transaction history
+
+## Run locally
 ```bash
+# Frontend
+git clone https://github.com/kurzmichael02-hue/whaletrack.git
+cd whaletrack
+npm install
+npm run dev
+
+# Backend
+git clone https://github.com/kurzmichael02-hue/whaletrack-backend.git
+cd whaletrack-backend
+npm install
 npm run dev
 ```
-Open [http://localhost:3000](http://localhost:3000)
 
-## Related
+Frontend → http://localhost:3000  
+Backend → http://localhost:4000
+
+## Repos
+
+- Frontend: [whaletrack](https://github.com/kurzmichael02-hue/whaletrack)
 - Backend: [whaletrack-backend](https://github.com/kurzmichael02-hue/whaletrack-backend)
 
 ## Status
-🚧 In Development
+
+Work in progress.
