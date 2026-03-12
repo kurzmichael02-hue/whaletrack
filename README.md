@@ -34,8 +34,3 @@ Frontend → http://localhost:3000 | Backend → http://localhost:4000
 ## Status
 
 Work in progress. More features coming.
-```
-```
-git add README.md
-git commit -m "docs: rewrite README"
-git push
