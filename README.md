@@ -64,11 +64,11 @@ ETHERSCAN_API_KEY=your_key_here
 ## Architecture
 ```mermaid
 flowchart TD
-    Browser["Browser\nNext.js App on Vercel"]
+    Browser["Browser — Next.js on Vercel"]
 
-    Browser --> Binance["Binance API\nLive prices every 15s"]
-    Browser --> API["/api/whales\nServerless API Route"]
-    Browser --> Wallet["Reown SDK\nWalletConnect"]
+    Browser --> Binance["Binance API — prices every 15s"]
+    Browser --> API["/api/whales — Serverless Route"]
+    Browser --> Wallet["Reown SDK — WalletConnect"]
 
-    API --> Etherscan["Etherscan V2\nOn-chain whale data"]
-    Wallet --> UserWallet["User Wallet\nMetaMask, Coinbase..."]
+    API --> Etherscan["Etherscan V2 — on-chain data"]
+    Wallet --> UserWallet["User Wallet — MetaMask, Coinbase"]
