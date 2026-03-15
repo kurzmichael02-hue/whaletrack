@@ -1,36 +1,74 @@
-# WhaleTrack 🐋
+# WhaleTrack – Architecture
 
-Track what the big players are doing. WhaleTrack monitors on-chain whale wallet activity
-and streams live crypto prices — all in one dashboard.
+## Overview
 
-Built as a side project to get better at Web3 and real-time data.
+WhaleTrack is a Next.js fullstack app deployed entirely on Vercel.
+No separate backend — all server logic runs as Next.js API Routes (serverless functions).
 
-## What it does
+## System Architecture
 
-- Streams live BTC, ETH and SOL prices via WebSocket (Binance API)
-- Monitors on-chain transactions from major whale wallets (Binance, Vitalik, Justin Sun)
-- Shows portfolio value and PnL based on current market prices
-- Transaction history per wallet
+![Architecture](./architecture.png)
 
-## Tech
+## Data Flow
 
-- **Frontend:** Next.js, TypeScript, TailwindCSS → Vercel
-- **Backend:** Node.js, Express, WebSocket → Render
-- **Data:** Binance API, Etherscan V2 API
+### Live Prices (Dashboard)
+Browser → Binance REST API (every 15s) → rendered in TokenTable
 
-## Run locally
-```bash
-# Frontend
-git clone https://github.com/kurzmichael02-hue/whaletrack.git
-cd whaletrack && npm install && npm run dev
+### Whale Tracker
+Browser → /api/whales (Next.js API Route on Vercel) → Etherscan V2 API → response cached 60s
 
-# Backend
-git clone https://github.com/kurzmichael02-hue/whaletrack-backend.git
-cd whaletrack-backend && npm install && npm run dev
-```
+### Wallet Connect
+Browser → Reown/WalletConnect SDK → user's wallet (MetaMask etc.)
 
-Frontend → http://localhost:3000 | Backend → http://localhost:4000
+## Folder Structure
 
-## Status
+\`\`\`
+whaletrack/
+├── app/
+│   ├── api/
+│   │   └── whales/        # Serverless API route (Etherscan)
+│   ├── components/
+│   │   ├── Navbar.tsx
+│   │   ├── Sidebar.tsx
+│   │   ├── StatsCard.tsx
+│   │   └── TokenTable.tsx  # Fetches live prices from Binance
+│   ├── portfolio/          # Portfolio page with PnL
+│   ├── trades/             # Trade history
+│   ├── whales/             # Whale wallet tracker
+│   ├── context/            # WalletConnect provider
+│   ├── layout.tsx          # Root layout (sidebar + navbar)
+│   └── page.tsx            # Dashboard
+├── public/
+│   └── docs/
+└── .env.local              # ETHERSCAN_API_KEY
+\`\`\`
 
-Work in progress. More features coming.
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Framework | Next.js 14 (App Router) |
+| Language | TypeScript |
+| Styling | TailwindCSS |
+| Wallet | Reown / WalletConnect |
+| Market Data | Binance REST API |
+| On-chain Data | Etherscan V2 API |
+| Deployment | Vercel |
+
+## Environment Variables
+
+\`\`\`
+ETHERSCAN_API_KEY=your_key_here
+\`\`\`
+
+## Architecture
+```mermaid
+flowchart TD
+    Browser["Browser\nNext.js App on Vercel"]
+
+    Browser --> Binance["Binance API\nLive prices every 15s"]
+    Browser --> API["/api/whales\nServerless API Route"]
+    Browser --> Wallet["Reown SDK\nWalletConnect"]
+
+    API --> Etherscan["Etherscan V2\nOn-chain whale data"]
+    Wallet --> UserWallet["User Wallet\nMetaMask, Coinbase..."]
