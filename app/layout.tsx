@@ -18,12 +18,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body className={inter.className}>
         <AppKitProvider>
-          <div style={{ display: "flex", minHeight: "100vh" }}>
+          <div style={{ display: "flex", height: "100vh", overflow: "hidden" }}>
             <Sidebar />
-            <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+            <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
               <Navbar />
               <Ticker />
-              <main style={{ flex: 1, overflowY: "auto" }}>
+              <main style={{ flex: 1, overflowY: "auto", overflowX: "hidden" }}>
                 {children}
               </main>
             </div>

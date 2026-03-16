@@ -51,7 +51,7 @@ export default function PriceChart() {
     containerRef.current.appendChild(script);
   }, [symbol, interval]);
 
-  const chartHeight = fullscreen ? "calc(100vh - 120px)" : "500px";
+  const chartHeight = fullscreen ? "calc(100vh - 120px)" : "600px";
 
   return (
     <div

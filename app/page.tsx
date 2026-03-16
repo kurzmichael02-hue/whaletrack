@@ -7,12 +7,16 @@ import Trending from "./components/Trending";
 
 export default function Home() {
   return (
-    <div style={{ minHeight: "100vh" }}>
+    <div>
       <LiveStats />
       <MarketStats />
       <FearGreed />
       <Trending />
-      <PriceChart />
+      <div style={{ height: "1px", background: "#1f1f1f" }} />
+      <div style={{ padding: "0" }}>
+        <PriceChart />
+      </div>
+      <div style={{ height: "1px", background: "#1f1f1f" }} />
       <TokenTable />
     </div>
   );
