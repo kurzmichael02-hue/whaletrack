@@ -1,35 +1,54 @@
-# WhaleTrack 🐋
+# WhaleTrack
 
-My first Web3 project — a crypto dashboard I built to track what the biggest players in the market are doing in real-time. Shows live prices for 15 tokens with auto-refresh, monitors on-chain transactions from major Ethereum whale wallets like Binance, Vitalik and market makers like Cumberland and Jump Trading, and includes a portfolio tracker with real PnL based on live market data. Wallet connectivity via WalletConnect built in.
+My first Web3 project — a crypto dashboard I built to track what the biggest players in the market are doing in real-time. Started as a simple price tracker and grew into a full dashboard with live market data, on-chain whale monitoring, wallet connectivity and more.
+
+## What it does
+
+- Live prices for 15 tokens with auto-refresh every 15 seconds and a scrolling ticker across all pages
+- TradingView price chart with multiple timeframes and fullscreen mode
+- Fear & Greed Index with 7-day history
+- Global market cap, 24h volume and BTC/ETH dominance stats
+- Trending coins — what's moving right now
+- Whale tracker — monitors on-chain transactions from major Ethereum wallets like Binance, Vitalik Buterin and Cumberland
+- Portfolio tracker — connect your wallet to see real ETH balance and ERC-20 tokens, or browse a demo portfolio with live PnL
+- Trade history with open/closed filter and PnL tracking
+- Crypto news feed via NewsData.io with filtering by token
+- Price alerts — set a target price and get a browser notification when it hits
+- Wallet connectivity via WalletConnect / Reown — supports MetaMask, Coinbase and 500+ wallets
 
 ## Architecture
 ```mermaid
-%%{init: {'theme': 'dark', 'themeVariables': {'primaryColor': '#1a1f35', 'primaryTextColor': '#fff', 'primaryBorderColor': '#10b981', 'lineColor': '#10b981', 'secondaryColor': '#0d1529', 'tertiaryColor': '#0a0f1e'}}}%%
+%%{init: {'theme': 'dark', 'themeVariables': {'primaryColor': '#1a1f35', 'primaryTextColor': '#fff', 'primaryBorderColor': '#0ecb81', 'lineColor': '#0ecb81', 'secondaryColor': '#0d1529', 'tertiaryColor': '#0a0f1e'}}}%%
 flowchart TD
     Browser["Browser — Next.js on Vercel"]
 
     Browser -->|every 15s| Binance["Binance API — live prices"]
-    Browser -->|on load| API["/api/whales — Serverless Route"]
-    Browser -->|connect| Wallet["Reown SDK — WalletConnect"]
+    Browser -->|on load| Whales["/api/whales — Serverless Route"]
+    Browser -->|on load| News["/api/news — Serverless Route"]
+    Browser -->|on load| Market["/api/marketcap — Serverless Route"]
+    Browser -->|on load| FG["/api/feargreed — Serverless Route"]
+    Browser -->|on connect| Wallet["Reown SDK — WalletConnect"]
 
-    API -->|fetch| Etherscan["Etherscan V2 — on-chain data"]
-    Wallet -->|sign| UserWallet["User Wallet — MetaMask, Coinbase"]
+    Whales -->|fetch| Etherscan["Etherscan V2 — on-chain data"]
+    News -->|fetch| NewsData["NewsData.io — crypto news"]
+    Market -->|fetch| CoinGecko["CoinGecko — market data"]
+    Wallet -->|sign| UserWallet["User Wallet — MetaMask, Coinbase..."]
 ```
 
 ## Stack
 
-- **Frontend:** Next.js, TypeScript, TailwindCSS
-- **Data:** Binance API, Etherscan V2 API
-- **Wallet:** Reown / WalletConnect
-- **Deployment:** Vercel
-
-## Features
-
-- Live prices for 15 tokens with auto-refresh every 15s
-- Whale wallet monitoring — Binance, Vitalik, Cumberland, Jump Trading and more
-- Portfolio tracker with real PnL based on current market prices
-- Transaction history
-- Connect your own wallet
+| Layer | Technology |
+|---|---|
+| Framework | Next.js 14 (App Router) |
+| Language | TypeScript |
+| Styling | TailwindCSS |
+| Animations | Framer Motion |
+| Wallet | Reown / WalletConnect |
+| Charts | TradingView Widget |
+| Market Data | Binance API, CoinGecko API |
+| On-chain | Etherscan V2 API |
+| News | NewsData.io API |
+| Deployment | Vercel |
 
 ## Run locally
 ```bash
@@ -40,10 +59,44 @@ cd whaletrack && npm install && npm run dev
 Add `.env.local`:
 ```
 ETHERSCAN_API_KEY=your_key_here
+NEWSDATA_API_KEY=your_key_here
+NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=your_key_here
 ```
 
 Frontend → http://localhost:3000
 
+## Project Structure
+```
+whaletrack/
+├── app/
+│   ├── api/
+│   │   ├── whales/          ← On-chain whale tracking
+│   │   ├── news/            ← Crypto news feed
+│   │   ├── marketcap/       ← Global market stats
+│   │   ├── feargreed/       ← Fear & Greed Index
+│   │   └── wallet/          ← Connected wallet data
+│   ├── components/
+│   │   ├── Ticker.tsx        ← Live scrolling price ticker
+│   │   ├── LiveStats.tsx     ← Portfolio value & PnL
+│   │   ├── MarketStats.tsx   ← Market cap & dominance
+│   │   ├── FearGreed.tsx     ← Fear & Greed Index
+│   │   ├── Trending.tsx      ← Trending coins
+│   │   ├── PriceChart.tsx    ← TradingView chart
+│   │   ├── TokenTable.tsx    ← Live market overview
+│   │   ├── WalletDashboard.tsx ← Real wallet data
+│   │   ├── PriceAlerts.tsx   ← Browser notifications
+│   │   ├── Navbar.tsx
+│   │   └── Sidebar.tsx
+│   ├── alerts/
+│   ├── portfolio/
+│   ├── trades/
+│   ├── whales/
+│   ├── news/
+│   ├── settings/
+│   └── page.tsx             ← Dashboard
+└── .env.local
+```
+
 ## Status
 
-Work in progress.
+Work in progress. More features coming.
