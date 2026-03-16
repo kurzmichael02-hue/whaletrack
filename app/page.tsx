@@ -1,5 +1,6 @@
 import StatsCard from "./components/StatsCard";
 import TokenTable from "./components/TokenTable";
+import PriceChart from "./components/PriceChart";
 
 export default function Home() {
   return (
@@ -13,6 +14,7 @@ export default function Home() {
         <StatsCard label="PnL Today" value="+$340.20" positive />
         <StatsCard label="Open Positions" value="4" />
       </div>
+      <PriceChart />
       <TokenTable />
     </div>
   );
