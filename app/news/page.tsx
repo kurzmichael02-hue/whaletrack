@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 
 type NewsItem = {
   article_id: string;
@@ -19,17 +20,12 @@ export default function NewsPage() {
   const [filter, setFilter] = useState<"all" | "bitcoin" | "ethereum" | "solana">("all");
 
   useEffect(() => {
-    fetch("/api/news")
-      .then((r) => r.json())
-      .then((data) => { setNews(data); setLoading(false); });
+    fetch("/api/news").then((r) => r.json()).then((d) => { setNews(d); setLoading(false); });
   }, []);
 
-  const filtered = filter === "all"
-    ? news
-    : news.filter((n) =>
-        n.title?.toLowerCase().includes(filter) ||
-        n.description?.toLowerCase().includes(filter)
-      );
+  const filtered = filter === "all" ? news : news.filter((n) =>
+    n.title?.toLowerCase().includes(filter) || n.description?.toLowerCase().includes(filter)
+  );
 
   const timeAgo = (date: string) => {
     const diff = Date.now() - new Date(date).getTime();
@@ -41,74 +37,68 @@ export default function NewsPage() {
   };
 
   return (
-    <div className="p-8 space-y-6 min-h-screen" style={{ background: "linear-gradient(135deg, #0a0f1e 0%, #0d1529 50%, #0a0f1e 100%)" }}>
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold text-white tracking-tight">News</h2>
-          <p className="text-gray-500 text-sm mt-1">Latest crypto news</p>
-        </div>
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium" style={{ background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.2)", color: "#10b981" }}>
-          <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse inline-block" />
-          Live Feed
-        </div>
-      </div>
-
-      <div className="flex gap-2">
-        {(["all", "bitcoin", "ethereum", "solana"] as const).map((f) => (
-          <button key={f} onClick={() => setFilter(f)}
-            className="px-4 py-1.5 rounded-lg text-sm font-medium transition-all capitalize"
-            style={{
-              background: filter === f ? "rgba(16,185,129,0.12)" : "rgba(255,255,255,0.03)",
-              border: filter === f ? "1px solid rgba(16,185,129,0.25)" : "1px solid rgba(255,255,255,0.07)",
-              color: filter === f ? "#10b981" : "#6b7280",
+    <div style={{ minHeight: "100vh" }}>
+      <div style={{ padding: "12px 20px", borderBottom: "1px solid #1f1f1f", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div style={{ display: "flex", gap: "4px" }}>
+          {(["all", "bitcoin", "ethereum", "solana"] as const).map((f) => (
+            <button key={f} onClick={() => setFilter(f)} style={{
+              padding: "4px 12px", borderRadius: "4px", border: "1px solid",
+              fontSize: "12px", cursor: "pointer", fontWeight: 500, transition: "all 0.1s",
+              background: filter === f ? "rgba(14,203,129,0.08)" : "transparent",
+              borderColor: filter === f ? "rgba(14,203,129,0.3)" : "#1f1f1f",
+              color: filter === f ? "#0ecb81" : "#808080",
             }}>
-            {f === "all" ? "All" : f.charAt(0).toUpperCase() + f.slice(1)}
-          </button>
-        ))}
+              {f.charAt(0).toUpperCase() + f.slice(1)}
+            </button>
+          ))}
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+          <span style={{ width: "5px", height: "5px", borderRadius: "50%", background: "#0ecb81", display: "inline-block" }} />
+          <span style={{ fontSize: "11px", color: "#404040" }}>Live</span>
+        </div>
       </div>
 
       {loading ? (
-        <div className="flex items-center gap-3 text-gray-500 py-20 justify-center">
-          <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse inline-block" />
-          Loading news...
+        <div style={{ padding: "20px" }}>
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} style={{ padding: "16px 0", borderBottom: "1px solid #1f1f1f" }}>
+              <div className="skeleton" style={{ height: "16px", width: "80%", marginBottom: "8px" }} />
+              <div className="skeleton" style={{ height: "12px", width: "40%" }} />
+            </div>
+          ))}
         </div>
-      ) : filtered.length === 0 ? (
-        <div className="text-gray-600 text-center py-20">No news found.</div>
       ) : (
-        <div className="grid gap-3">
-          {filtered.map((item) => (
-            <a key={item.article_id} href={item.link} target="_blank" rel="noopener noreferrer"
-              className="block rounded-2xl p-5 transition-all hover:bg-white/5"
-              style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex-1 min-w-0">
-                  <p className="text-white font-medium leading-snug">{item.title}</p>
-                  {item.description && (
-                    <p className="text-gray-500 text-sm mt-1 line-clamp-2">{item.description}</p>
-                  )}
-                  <div className="flex items-center gap-3 mt-2">
-                    <span className="text-gray-500 text-xs">{item.source_name}</span>
-                    <span className="text-gray-700 text-xs">·</span>
-                    <span className="text-gray-500 text-xs">{timeAgo(item.pubDate)}</span>
-                    {item.keywords && item.keywords.length > 0 && (
-                      <>
-                        <span className="text-gray-700 text-xs">·</span>
-                        <div className="flex gap-1">
-                          {item.keywords.slice(0, 3).map((k) => (
-                            <span key={k} className="px-1.5 py-0.5 rounded text-xs" style={{ background: "rgba(255,255,255,0.06)", color: "#9ca3af" }}>
-                              {k}
-                            </span>
-                          ))}
-                        </div>
-                      </>
-                    )}
-                  </div>
-                </div>
-                {item.image_url && (
-                  <img src={item.image_url} alt="" className="w-20 h-16 rounded-xl object-cover shrink-0" />
+        <div>
+          {filtered.map((item, i) => (
+            <motion.a key={item.article_id} href={item.link} target="_blank" rel="noopener noreferrer"
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.03 }}
+              style={{
+                display: "flex", alignItems: "flex-start", gap: "16px",
+                padding: "16px 20px", borderBottom: "1px solid #1f1f1f",
+                textDecoration: "none", transition: "background 0.1s",
+              }}
+              whileHover={{ backgroundColor: "rgba(255,255,255,0.02)" } as any}
+            >
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p style={{ fontSize: "13px", fontWeight: 500, color: "#fff", lineHeight: 1.5, marginBottom: "6px" }}>{item.title}</p>
+                {item.description && (
+                  <p style={{ fontSize: "12px", color: "#808080", lineHeight: 1.5, marginBottom: "6px", overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" as any }}>
+                    {item.description}
+                  </p>
                 )}
+                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                  <span style={{ fontSize: "11px", color: "#404040" }}>{item.source_name}</span>
+                  <span style={{ color: "#1f1f1f" }}>·</span>
+                  <span style={{ fontSize: "11px", color: "#404040" }}>{timeAgo(item.pubDate)}</span>
+                  {item.keywords?.slice(0, 2).map((k) => (
+                    <span key={k} className="tag-neutral" style={{ fontSize: "10px" }}>{k}</span>
+                  ))}
+                </div>
               </div>
-            </a>
+              {item.image_url && (
+                <img src={item.image_url} alt="" style={{ width: "72px", height: "52px", objectFit: "cover", borderRadius: "4px", flexShrink: 0, opacity: 0.8 }} />
+              )}
+            </motion.a>
           ))}
         </div>
       )}

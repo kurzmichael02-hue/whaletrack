@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 
 type Token = {
   symbol: string;
@@ -20,11 +21,13 @@ type Transaction = {
   date: string;
 };
 
-const MOCK_HOLDINGS: Token[] = [
-  { symbol: "BTC", amount: 0.12, price: 0, value: 0, pnl: 0, pnlPercent: 0 },
-  { symbol: "ETH", amount: 2.5, price: 0, value: 0, pnl: 0, pnlPercent: 0 },
-  { symbol: "SOL", amount: 45, price: 0, value: 0, pnl: 0, pnlPercent: 0 },
+const MOCK_HOLDINGS = [
+  { symbol: "BTC", amount: 0.12 },
+  { symbol: "ETH", amount: 2.5 },
+  { symbol: "SOL", amount: 45 },
 ];
+
+const BUY_PRICES: Record<string, number> = { BTC: 62000, ETH: 1800, SOL: 60 };
 
 const MOCK_TRANSACTIONS: Transaction[] = [
   { hash: "0xabc123", type: "buy", symbol: "BTC", amount: 0.12, price: 62000, date: "2024-12-01" },
@@ -32,170 +35,129 @@ const MOCK_TRANSACTIONS: Transaction[] = [
   { hash: "0xghi789", type: "buy", symbol: "SOL", amount: 45, price: 60, date: "2024-10-20" },
 ];
 
-const BUY_PRICES: Record<string, number> = { BTC: 62000, ETH: 1800, SOL: 60 };
-
-const TOKEN_COLORS: Record<string, string> = {
-  BTC: "#F7931A",
-  ETH: "#627EEA",
-  SOL: "#9945FF",
-};
-
-const TOKEN_ICONS: Record<string, string> = {
-  BTC: "₿",
-  ETH: "Ξ",
-  SOL: "◎",
-};
-
 export default function PortfolioPage() {
-  const [holdings, setHoldings] = useState<Token[]>(MOCK_HOLDINGS);
+  const [holdings, setHoldings] = useState<Token[]>([]);
   const [totalValue, setTotalValue] = useState(0);
   const [totalPnl, setTotalPnl] = useState(0);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    async function loadPrices() {
-  try {
-    const symbols = ["BTCUSDT", "ETHUSDT", "SOLUSDT"];
-    const results = await Promise.all(
-      symbols.map((s) =>
-        fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${s}`)
-          .then((r) => r.json())
-      )
-    );
-    const priceMap: Record<string, number> = {
-      BTC: parseFloat(results[0].price),
-      ETH: parseFloat(results[1].price),
-      SOL: parseFloat(results[2].price),
-    };
-
-    const updated = MOCK_HOLDINGS.map((h) => {
-      const currentPrice = priceMap[h.symbol] ?? 0;
-      const value = h.amount * currentPrice;
-      const buyValue = h.amount * (BUY_PRICES[h.symbol] ?? 0);
-      const pnl = value - buyValue;
-      const pnlPercent = buyValue > 0 ? (pnl / buyValue) * 100 : 0;
-      return { ...h, price: currentPrice, value, pnl, pnlPercent };
-    });
-
-    setHoldings(updated);
-    setTotalValue(updated.reduce((s, h) => s + h.value, 0));
-    setTotalPnl(updated.reduce((s, h) => s + h.pnl, 0));
-  } catch (e) {
-    console.error(e);
-  }
-  setLoaded(true);
-}
-
-
-    loadPrices();
+    async function load() {
+      try {
+        const results = await Promise.all(
+          ["BTCUSDT", "ETHUSDT", "SOLUSDT"].map((s) =>
+            fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${s}`).then((r) => r.json())
+          )
+        );
+        const prices: Record<string, number> = {
+          BTC: parseFloat(results[0].price),
+          ETH: parseFloat(results[1].price),
+          SOL: parseFloat(results[2].price),
+        };
+        const updated = MOCK_HOLDINGS.map((h) => {
+          const price = prices[h.symbol] ?? 0;
+          const value = h.amount * price;
+          const buyValue = h.amount * (BUY_PRICES[h.symbol] ?? 0);
+          const pnl = value - buyValue;
+          return { ...h, price, value, pnl, pnlPercent: buyValue > 0 ? (pnl / buyValue) * 100 : 0 };
+        });
+        setHoldings(updated);
+        setTotalValue(updated.reduce((s, h) => s + h.value, 0));
+        setTotalPnl(updated.reduce((s, h) => s + h.pnl, 0));
+      } catch (e) { console.error(e); }
+      setLoaded(true);
+    }
+    load();
   }, []);
 
   const fmt = (n: number) => n.toLocaleString(undefined, { maximumFractionDigits: 2 });
 
   return (
-    <div className="p-8 space-y-8 min-h-screen" style={{ background: "linear-gradient(135deg, #0a0f1e 0%, #0d1529 50%, #0a0f1e 100%)" }}>
-      
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold text-white tracking-tight">Portfolio</h2>
-          <p className="text-gray-500 text-sm mt-1">Your crypto holdings overview</p>
-        </div>
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium" style={{ background: "rgba(16, 185, 129, 0.1)", border: "1px solid rgba(16, 185, 129, 0.2)", color: "#10b981" }}>
-          <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse inline-block" />
-          Live Prices
-        </div>
-      </div>
-
-      {/* Summary Cards */}
-      <div className="grid grid-cols-3 gap-4">
+    <div style={{ minHeight: "100vh" }}>
+      {/* Stats row */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", borderBottom: "1px solid #1f1f1f" }}>
         {[
-          { label: "Total Value", value: `$${fmt(totalValue)}`, color: "#fff" },
-          { label: "Total PnL", value: `${totalPnl >= 0 ? "+" : ""}$${fmt(totalPnl)}`, color: totalPnl >= 0 ? "#10b981" : "#ef4444" },
-          { label: "Assets", value: `${holdings.length}`, color: "#fff" },
-        ].map((card) => (
-          <div key={card.label} className="rounded-2xl p-5" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", backdropFilter: "blur(10px)" }}>
-            <p className="text-gray-500 text-xs uppercase tracking-widest mb-2">{card.label}</p>
-            <p className="text-2xl font-bold" style={{ color: card.color }}>{loaded ? card.value : "—"}</p>
-          </div>
+          { label: "Total Value", value: loaded ? `$${fmt(totalValue)}` : "—", green: false },
+          { label: "Total PnL", value: loaded ? `${totalPnl >= 0 ? "+" : ""}$${fmt(totalPnl)}` : "—", green: totalPnl >= 0 },
+          { label: "Assets", value: `${holdings.length}`, green: false },
+        ].map((s, i) => (
+          <motion.div key={s.label} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.06 }}
+            style={{ padding: "20px", borderRight: i < 2 ? "1px solid #1f1f1f" : "none" }}>
+            <p style={{ fontSize: "11px", color: "#404040", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "8px" }}>{s.label}</p>
+            <p style={{ fontSize: "24px", fontWeight: 600, color: s.green ? "#0ecb81" : "#ffffff", fontFamily: "monospace", fontVariantNumeric: "tabular-nums" }}>{s.value}</p>
+          </motion.div>
         ))}
       </div>
 
-      {/* Holdings */}
-      <div className="rounded-2xl overflow-hidden" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
-        <div className="px-6 py-4 border-b border-white/5">
-          <h3 className="text-white font-semibold">Token Holdings</h3>
+      {/* Holdings table */}
+      <div style={{ borderBottom: "1px solid #1f1f1f" }}>
+        <div style={{ padding: "12px 20px", borderBottom: "1px solid #1f1f1f", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <span style={{ fontSize: "12px", fontWeight: 500, color: "#808080", textTransform: "uppercase", letterSpacing: "0.06em" }}>Holdings</span>
         </div>
-        <table className="w-full">
+        <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
-            <tr className="text-gray-500 text-xs uppercase tracking-widest">
-              <th className="text-left px-6 py-3">Asset</th>
-              <th className="text-left px-6 py-3">Amount</th>
-              <th className="text-left px-6 py-3">Price</th>
-              <th className="text-left px-6 py-3">Value</th>
-              <th className="text-left px-6 py-3">PnL</th>
+            <tr style={{ borderBottom: "1px solid #1f1f1f" }}>
+              {["Asset", "Amount", "Price", "Value", "PnL"].map((h) => (
+                <th key={h} style={{ padding: "10px 20px", textAlign: "left", fontSize: "11px", color: "#404040", textTransform: "uppercase", letterSpacing: "0.06em", fontWeight: 400 }}>{h}</th>
+              ))}
             </tr>
           </thead>
           <tbody>
-            {holdings.map((h, i) => (
-              <tr key={h.symbol} className="border-t border-white/5 hover:bg-white/2 transition-colors" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
-                <td className="px-6 py-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl flex items-center justify-center text-lg font-bold" style={{ background: `${TOKEN_COLORS[h.symbol]}20`, color: TOKEN_COLORS[h.symbol] }}>
-                      {TOKEN_ICONS[h.symbol]}
-                    </div>
-                    <span className="text-white font-semibold">{h.symbol}</span>
-                  </div>
-                </td>
-                <td className="px-6 py-4 text-gray-400">{h.amount}</td>
-                <td className="px-6 py-4 text-gray-300">{loaded ? `$${fmt(h.price)}` : "—"}</td>
-                <td className="px-6 py-4 text-white font-medium">{loaded ? `$${fmt(h.value)}` : "—"}</td>
-                <td className="px-6 py-4">
-                  <span className={`px-2.5 py-1 rounded-lg text-xs font-semibold ${h.pnl >= 0 ? "text-green-400" : "text-red-400"}`} style={{ background: h.pnl >= 0 ? "rgba(16,185,129,0.1)" : "rgba(239,68,68,0.1)" }}>
-                    {loaded ? `${h.pnl >= 0 ? "+" : ""}$${fmt(h.pnl)} (${h.pnlPercent.toFixed(1)}%)` : "—"}
+            {!loaded ? (
+              Array.from({ length: 3 }).map((_, i) => (
+                <tr key={i} style={{ borderBottom: "1px solid #1f1f1f" }}>
+                  {Array.from({ length: 5 }).map((_, j) => (
+                    <td key={j} style={{ padding: "14px 20px" }}>
+                      <div className="skeleton" style={{ height: "14px", width: j === 0 ? "80px" : "60px" }} />
+                    </td>
+                  ))}
+                </tr>
+              ))
+            ) : holdings.map((h, i) => (
+              <motion.tr key={h.symbol} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: i * 0.05 }}
+                style={{ borderBottom: "1px solid #1f1f1f", cursor: "default" }}>
+                <td style={{ padding: "14px 20px", fontSize: "13px", fontWeight: 600, color: "#fff" }}>{h.symbol}</td>
+                <td style={{ padding: "14px 20px", fontSize: "13px", color: "#808080", fontFamily: "monospace" }}>{h.amount}</td>
+                <td style={{ padding: "14px 20px", fontSize: "13px", color: "#fff", fontFamily: "monospace" }}>{loaded ? `$${fmt(h.price)}` : "—"}</td>
+                <td style={{ padding: "14px 20px", fontSize: "13px", color: "#fff", fontFamily: "monospace" }}>{loaded ? `$${fmt(h.value)}` : "—"}</td>
+                <td style={{ padding: "14px 20px" }}>
+                  <span style={{ fontSize: "12px", fontWeight: 500, color: h.pnl >= 0 ? "#0ecb81" : "#f6465d", fontFamily: "monospace" }}>
+                    {h.pnl >= 0 ? "+" : ""}${fmt(h.pnl)} ({h.pnlPercent.toFixed(1)}%)
                   </span>
                 </td>
-              </tr>
+              </motion.tr>
             ))}
           </tbody>
         </table>
       </div>
 
-      {/* Transaction History */}
-      <div className="rounded-2xl overflow-hidden" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
-        <div className="px-6 py-4 border-b border-white/5">
-          <h3 className="text-white font-semibold">Transaction History</h3>
+      {/* Transaction history */}
+      <div>
+        <div style={{ padding: "12px 20px", borderBottom: "1px solid #1f1f1f" }}>
+          <span style={{ fontSize: "12px", fontWeight: 500, color: "#808080", textTransform: "uppercase", letterSpacing: "0.06em" }}>Transaction History</span>
         </div>
-        <table className="w-full">
+        <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
-            <tr className="text-gray-500 text-xs uppercase tracking-widest">
-              <th className="text-left px-6 py-3">Hash</th>
-              <th className="text-left px-6 py-3">Type</th>
-              <th className="text-left px-6 py-3">Asset</th>
-              <th className="text-left px-6 py-3">Amount</th>
-              <th className="text-left px-6 py-3">Price</th>
-              <th className="text-left px-6 py-3">Date</th>
+            <tr style={{ borderBottom: "1px solid #1f1f1f" }}>
+              {["Hash", "Type", "Asset", "Amount", "Price", "Date"].map((h) => (
+                <th key={h} style={{ padding: "10px 20px", textAlign: "left", fontSize: "11px", color: "#404040", textTransform: "uppercase", letterSpacing: "0.06em", fontWeight: 400 }}>{h}</th>
+              ))}
             </tr>
           </thead>
           <tbody>
-            {MOCK_TRANSACTIONS.map((tx) => (
-              <tr key={tx.hash} className="border-t transition-colors" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
-                <td className="px-6 py-4 font-mono text-xs text-blue-400">{tx.hash.slice(0, 14)}...</td>
-                <td className="px-6 py-4">
-                  <span className={`px-2.5 py-1 rounded-lg text-xs font-bold ${tx.type === "buy" ? "text-green-400" : "text-red-400"}`} style={{ background: tx.type === "buy" ? "rgba(16,185,129,0.1)" : "rgba(239,68,68,0.1)" }}>
-                    {tx.type.toUpperCase()}
-                  </span>
+            {MOCK_TRANSACTIONS.map((tx, i) => (
+              <motion.tr key={tx.hash} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.05 }}
+                style={{ borderBottom: "1px solid #1f1f1f" }}>
+                <td style={{ padding: "14px 20px", fontFamily: "monospace", fontSize: "12px", color: "#3b82f6" }}>{tx.hash.slice(0, 14)}...</td>
+                <td style={{ padding: "14px 20px" }}>
+                  <span className={tx.type === "buy" ? "tag-green" : "tag-red"}>{tx.type.toUpperCase()}</span>
                 </td>
-                <td className="px-6 py-4">
-                  <div className="flex items-center gap-2">
-                    <span style={{ color: TOKEN_COLORS[tx.symbol] }}>{TOKEN_ICONS[tx.symbol]}</span>
-                    <span className="text-white">{tx.symbol}</span>
-                  </div>
-                </td>
-                <td className="px-6 py-4 text-gray-400">{tx.amount}</td>
-                <td className="px-6 py-4 text-gray-300">${tx.price.toLocaleString()}</td>
-                <td className="px-6 py-4 text-gray-500 text-sm">{tx.date}</td>
-              </tr>
+                <td style={{ padding: "14px 20px", fontSize: "13px", color: "#fff", fontWeight: 500 }}>{tx.symbol}</td>
+                <td style={{ padding: "14px 20px", fontSize: "13px", color: "#808080", fontFamily: "monospace" }}>{tx.amount}</td>
+                <td style={{ padding: "14px 20px", fontSize: "13px", color: "#fff", fontFamily: "monospace" }}>${tx.price.toLocaleString()}</td>
+                <td style={{ padding: "14px 20px", fontSize: "12px", color: "#404040" }}>{tx.date}</td>
+              </motion.tr>
             ))}
           </tbody>
         </table>
