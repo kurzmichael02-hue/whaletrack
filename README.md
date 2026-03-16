@@ -74,6 +74,7 @@ whaletrack/
 │   │   ├── news/            ← Crypto news feed
 │   │   ├── marketcap/       ← Global market stats
 │   │   ├── feargreed/       ← Fear & Greed Index
+│   │   ├── trending/        ← Trending coins
 │   │   └── wallet/          ← Connected wallet data
 │   ├── components/
 │   │   ├── Ticker.tsx        ← Live scrolling price ticker
