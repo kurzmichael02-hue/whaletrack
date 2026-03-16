@@ -21,6 +21,7 @@ export default function PriceChart() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [symbol, setSymbol] = useState("BINANCE:BTCUSDT");
   const [interval, setInterval] = useState("D");
+  const [fullscreen, setFullscreen] = useState(false);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -50,11 +51,29 @@ export default function PriceChart() {
     containerRef.current.appendChild(script);
   }, [symbol, interval]);
 
+  const chartHeight = fullscreen ? "calc(100vh - 120px)" : "500px";
+
   return (
-    <div className="rounded-2xl overflow-hidden" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
+    <div
+      className="rounded-2xl overflow-hidden transition-all duration-300"
+      style={{
+        background: "rgba(255,255,255,0.03)",
+        border: "1px solid rgba(255,255,255,0.07)",
+        ...(fullscreen ? {
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          zIndex: 50,
+          borderRadius: 0,
+          background: "#0a0f1e",
+        } : {}),
+      }}
+    >
       <div className="px-6 py-4 flex items-center justify-between" style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
         <h3 className="text-white font-semibold">Price Chart</h3>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <div className="flex gap-1">
             {INTERVALS.map((i) => (
               <button key={i.value} onClick={() => setInterval(i.value)}
@@ -68,7 +87,7 @@ export default function PriceChart() {
               </button>
             ))}
           </div>
-          <div className="flex gap-1 ml-2">
+          <div className="flex gap-1">
             {SYMBOLS.map((s) => (
               <button key={s.value} onClick={() => setSymbol(s.value)}
                 className="px-3 py-1 rounded-lg text-xs font-medium transition-all"
@@ -81,9 +100,19 @@ export default function PriceChart() {
               </button>
             ))}
           </div>
+          <button
+            onClick={() => setFullscreen(!fullscreen)}
+            className="px-3 py-1 rounded-lg text-xs font-medium transition-all ml-1"
+            style={{
+              background: fullscreen ? "rgba(16,185,129,0.12)" : "rgba(255,255,255,0.03)",
+              border: fullscreen ? "1px solid rgba(16,185,129,0.25)" : "1px solid rgba(255,255,255,0.07)",
+              color: fullscreen ? "#10b981" : "#6b7280",
+            }}>
+            {fullscreen ? "✕ Exit" : "⛶ Expand"}
+          </button>
         </div>
       </div>
-      <div ref={containerRef} style={{ height: "500px" }} className="tradingview-widget-container" />
+      <div ref={containerRef} style={{ height: chartHeight }} className="tradingview-widget-container" />
     </div>
   );
 }
