@@ -16,42 +16,56 @@ export default function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="w-60 flex flex-col py-6 px-4 gap-1" style={{ background: "rgba(10,15,30,0.95)", borderRight: "1px solid rgba(255,255,255,0.06)", minHeight: "100vh" }}>
-      <div className="px-3 mb-8">
-        <div className="flex items-center gap-2">
-          <span className="text-2xl">🐋</span>
-          <span className="text-white font-bold text-lg tracking-tight">WhaleTrack</span>
+    <aside style={{
+      width: "220px",
+      minHeight: "100vh",
+      background: "rgba(8, 12, 20, 0.95)",
+      borderRight: "1px solid var(--border)",
+      display: "flex",
+      flexDirection: "column",
+      padding: "24px 12px",
+      gap: "4px",
+      backdropFilter: "blur(20px)",
+      position: "relative",
+      zIndex: 10,
+    }}>
+      <div style={{ padding: "0 12px", marginBottom: "32px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <span style={{ fontSize: "22px" }}>🐋</span>
+          <span style={{ color: "var(--text-primary)", fontWeight: 700, fontSize: "16px", letterSpacing: "-0.02em" }}>WhaleTrack</span>
         </div>
-        <p className="text-gray-600 text-xs mt-1 ml-9">Crypto Intelligence</p>
+        <p style={{ color: "var(--text-muted)", fontSize: "11px", marginTop: "4px", marginLeft: "30px" }}>Crypto Intelligence</p>
       </div>
 
-      <nav className="flex flex-col gap-1">
+      <nav style={{ display: "flex", flexDirection: "column", gap: "2px", flex: 1 }}>
         {links.map((link) => {
           const active = pathname === link.href;
           return (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-200"
-              style={{
-                background: active ? "rgba(16,185,129,0.12)" : "transparent",
-                color: active ? "#10b981" : "#6b7280",
-                border: active ? "1px solid rgba(16,185,129,0.2)" : "1px solid transparent",
-              }}
-            >
-              <span className="text-base">{link.icon}</span>
-              <span className="font-medium">{link.label}</span>
-              {active && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-green-400" />}
+            <Link key={link.href} href={link.href} style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+              padding: "10px 12px",
+              borderRadius: "10px",
+              fontSize: "13px",
+              fontWeight: 500,
+              textDecoration: "none",
+              transition: "all 0.15s",
+              background: active ? "var(--accent-dim)" : "transparent",
+              color: active ? "var(--accent)" : "var(--text-secondary)",
+              border: active ? "1px solid var(--accent-border)" : "1px solid transparent",
+            }}>
+              <span style={{ fontSize: "14px" }}>{link.icon}</span>
+              <span>{link.label}</span>
+              {active && <span style={{ marginLeft: "auto", width: "5px", height: "5px", borderRadius: "50%", background: "var(--accent)" }} />}
             </Link>
           );
         })}
       </nav>
 
-      <div className="mt-auto px-3">
-        <div className="rounded-xl p-3" style={{ background: "rgba(16,185,129,0.05)", border: "1px solid rgba(16,185,129,0.1)" }}>
-          <p className="text-green-400 text-xs font-medium">● Live</p>
-          <p className="text-gray-600 text-xs mt-0.5">Real-time data active</p>
-        </div>
+      <div style={{ padding: "12px", borderRadius: "12px", background: "var(--accent-dim)", border: "1px solid var(--accent-border)" }}>
+        <p style={{ color: "var(--accent)", fontSize: "11px", fontWeight: 600 }}>● Live</p>
+        <p style={{ color: "var(--text-muted)", fontSize: "11px", marginTop: "2px" }}>Real-time data active</p>
       </div>
     </aside>
   );
