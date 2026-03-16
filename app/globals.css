@@ -82,3 +82,13 @@ body {
   animation: shimmer 1.5s infinite;
   border-radius: 3px;
 }
+
+@media (max-width: 767px) {
+  table {
+    font-size: 11px;
+  }
+  
+  th, td {
+    padding: 10px 12px !important;
+  }
+}
