@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import { useContext } from "react";
 import { MenuContext } from "./Sidebar";
+import TokenSearch from "./TokenSearch";
 import React from "react";
 
 declare global {
@@ -29,12 +30,12 @@ export default function Navbar() {
 
   return (
     <header style={{
-      height: "48px", borderBottom: "1px solid #1f1f1f",
+      height: "52px", borderBottom: "1px solid #1a1a1a",
       display: "flex", alignItems: "center", justifyContent: "space-between",
-      padding: "0 16px", background: "#0a0a0a",
-      position: "sticky", top: 0, zIndex: 30,
+      padding: "0 16px", background: "#080808",
+      position: "sticky", top: 0, zIndex: 30, gap: "16px",
     }}>
-      <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "12px", flexShrink: 0 }}>
         <button
           className="mobile-only"
           onClick={() => setOpen(true)}
@@ -43,14 +44,19 @@ export default function Navbar() {
             background: "none", border: "none", cursor: "pointer", padding: "4px",
           }}
         >
-          <span style={{ width: "18px", height: "1.5px", background: "#808080", display: "block" }} />
-          <span style={{ width: "18px", height: "1.5px", background: "#808080", display: "block" }} />
-          <span style={{ width: "18px", height: "1.5px", background: "#808080", display: "block" }} />
+          <span style={{ width: "18px", height: "1.5px", background: "#505050", display: "block" }} />
+          <span style={{ width: "18px", height: "1.5px", background: "#505050", display: "block" }} />
+          <span style={{ width: "18px", height: "1.5px", background: "#505050", display: "block" }} />
         </button>
-        <span style={{ fontSize: "13px", fontWeight: 500, color: "#808080" }}>
+        <span style={{ fontSize: "13px", fontWeight: 500, color: "#404040" }}>
           {PAGE_TITLES[pathname] ?? "WhaleTrack"}
         </span>
       </div>
+
+      <div className="hide-mobile" style={{ flex: 1, maxWidth: "400px" }}>
+        <TokenSearch />
+      </div>
+
       <appkit-button />
     </header>
   );
