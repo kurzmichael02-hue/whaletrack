@@ -92,3 +92,19 @@ body {
   table { font-size: 11px; }
   th, td { padding: 8px 10px !important; }
 }
+
+@media (max-width: 767px) {
+  .mobile-only { display: flex !important; }
+  .desktop-sidebar { display: none; }
+  table { font-size: 11px; }
+  th, td { padding: 8px 10px !important; }
+  
+  /* Hide less important columns on mobile */
+  .hide-mobile { display: none !important; }
+  
+  /* Make content scrollable horizontally if needed */
+  .table-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
