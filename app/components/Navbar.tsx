@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { useContext } from "react";
 import { MenuContext } from "./Sidebar";
 import TokenSearch from "./TokenSearch";
+import ThemeToggle from "./ThemeToggle";
 import React from "react";
 
 declare global {
@@ -57,7 +58,10 @@ export default function Navbar() {
         <TokenSearch />
       </div>
 
-      <appkit-button />
+      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+        <ThemeToggle />
+        <appkit-button />
+      </div>
     </header>
   );
 }

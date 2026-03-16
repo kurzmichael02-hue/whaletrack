@@ -5,6 +5,7 @@ import AppKitProvider from "./context";
 import Sidebar, { DesktopSidebar, MenuProvider } from "./components/Sidebar";
 import Navbar from "./components/Navbar";
 import Ticker from "./components/Ticker";
+import LandingGate from "./components/LandingGate";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -28,7 +29,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <Navbar />
                 <Ticker />
                 <main style={{ flex: 1, overflowY: "auto", overflowX: "hidden" }}>
-                  {children}
+                  <LandingGate>
+                    {children}
+                  </LandingGate>
                 </main>
               </div>
             </div>

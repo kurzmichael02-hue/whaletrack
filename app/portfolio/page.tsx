@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import WalletDashboard from "../components/WalletDashboard";
 import PortfolioChart from "../components/PortfolioChart";
+import ExportCSV from "../components/ExportCSV";
 
 type Holding = {
   id: string;
@@ -123,15 +124,18 @@ function ManualPortfolio() {
         <span style={{ fontSize: "11px", color: "#333", textTransform: "uppercase", letterSpacing: "0.08em" }}>
           Holdings ({holdings.length})
         </span>
-        <button onClick={() => setShowAdd(!showAdd)} style={{
-          padding: "5px 14px", borderRadius: "4px", cursor: "pointer",
-          fontSize: "12px", fontWeight: 500, transition: "all 0.1s",
-          background: showAdd ? "rgba(246,70,93,0.08)" : "rgba(14,203,129,0.08)",
-          border: showAdd ? "1px solid rgba(246,70,93,0.3)" : "1px solid rgba(14,203,129,0.3)",
-          color: showAdd ? "#f6465d" : "#0ecb81",
-        }}>
-          {showAdd ? "✕ Cancel" : "+ Add Token"}
-        </button>
+        <div style={{ display: "flex", gap: "8px" }}>
+          <ExportCSV holdings={enriched} />
+          <button onClick={() => setShowAdd(!showAdd)} style={{
+            padding: "5px 14px", borderRadius: "4px", cursor: "pointer",
+            fontSize: "12px", fontWeight: 500, transition: "all 0.1s",
+            background: showAdd ? "rgba(246,70,93,0.08)" : "rgba(14,203,129,0.08)",
+            border: showAdd ? "1px solid rgba(246,70,93,0.3)" : "1px solid rgba(14,203,129,0.3)",
+            color: showAdd ? "#f6465d" : "#0ecb81",
+          }}>
+            {showAdd ? "✕ Cancel" : "+ Add Token"}
+          </button>
+        </div>
       </div>
 
       <AnimatePresence>
@@ -172,8 +176,7 @@ function ManualPortfolio() {
               <button onClick={addHolding} style={{
                 padding: "8px 20px", borderRadius: "4px", cursor: "pointer",
                 fontSize: "13px", fontWeight: 500, background: "rgba(14,203,129,0.1)",
-                border: "1px solid rgba(14,203,129,0.3)", color: "#0ecb81",
-                height: "36px",
+                border: "1px solid rgba(14,203,129,0.3)", color: "#0ecb81", height: "36px",
               }}>
                 Add
               </button>
@@ -219,8 +222,7 @@ function ManualPortfolio() {
                   <td style={{ padding: "14px 20px" }}>
                     <button onClick={() => removeHolding(h.id)} style={{
                       background: "none", border: "none", color: "#222", cursor: "pointer",
-                      fontSize: "13px", padding: "2px 6px", borderRadius: "3px",
-                      transition: "color 0.1s",
+                      fontSize: "13px", padding: "2px 6px",
                     }}
                       onMouseEnter={(e) => (e.currentTarget.style.color = "#f6465d")}
                       onMouseLeave={(e) => (e.currentTarget.style.color = "#222")}

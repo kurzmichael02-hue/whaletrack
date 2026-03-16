@@ -128,3 +128,14 @@ tr:hover td { background: rgba(255,255,255,0.015) !important; }
   font-family: "JetBrains Mono", "SF Mono", monospace;
   font-variant-numeric: tabular-nums;
 }
+
+[data-theme="light"] {
+  --bg: #f8f8f8;
+  --bg-1: #ffffff;
+  --bg-2: #f0f0f0;
+  --border: #e5e5e5;
+  --border-2: #d0d0d0;
+  --text-1: #0a0a0a;
+  --text-2: #666666;
+  --text-3: #999999;
+}
