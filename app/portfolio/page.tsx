@@ -1,7 +1,9 @@
 "use client";
 
+import { useAccount } from "wagmi";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import WalletDashboard from "../components/WalletDashboard";
 
 type Token = {
   symbol: string;
@@ -36,6 +38,14 @@ const MOCK_TRANSACTIONS: Transaction[] = [
 ];
 
 export default function PortfolioPage() {
+  const { isConnected } = useAccount();
+
+  if (isConnected) return <WalletDashboard />;
+
+  return <MockPortfolio />;
+}
+
+function MockPortfolio() {
   const [holdings, setHoldings] = useState<Token[]>([]);
   const [totalValue, setTotalValue] = useState(0);
   const [totalPnl, setTotalPnl] = useState(0);
@@ -74,7 +84,10 @@ export default function PortfolioPage() {
 
   return (
     <div style={{ minHeight: "100vh" }}>
-      {/* Stats row */}
+      <div style={{ padding: "10px 20px", borderBottom: "1px solid #1f1f1f", background: "rgba(246,70,93,0.04)" }}>
+        <p style={{ fontSize: "11px", color: "#808080" }}>Connect your wallet to see real data. Showing demo portfolio.</p>
+      </div>
+
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", borderBottom: "1px solid #1f1f1f" }}>
         {[
           { label: "Total Value", value: loaded ? `$${fmt(totalValue)}` : "—", green: false },
@@ -84,15 +97,14 @@ export default function PortfolioPage() {
           <motion.div key={s.label} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.06 }}
             style={{ padding: "20px", borderRight: i < 2 ? "1px solid #1f1f1f" : "none" }}>
             <p style={{ fontSize: "11px", color: "#404040", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "8px" }}>{s.label}</p>
-            <p style={{ fontSize: "24px", fontWeight: 600, color: s.green ? "#0ecb81" : "#ffffff", fontFamily: "monospace", fontVariantNumeric: "tabular-nums" }}>{s.value}</p>
+            <p style={{ fontSize: "24px", fontWeight: 600, color: s.green ? "#0ecb81" : "#fff", fontFamily: "monospace", fontVariantNumeric: "tabular-nums" }}>{s.value}</p>
           </motion.div>
         ))}
       </div>
 
-      {/* Holdings table */}
       <div style={{ borderBottom: "1px solid #1f1f1f" }}>
-        <div style={{ padding: "12px 20px", borderBottom: "1px solid #1f1f1f", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <span style={{ fontSize: "12px", fontWeight: 500, color: "#808080", textTransform: "uppercase", letterSpacing: "0.06em" }}>Holdings</span>
+        <div style={{ padding: "10px 20px", borderBottom: "1px solid #1f1f1f" }}>
+          <span style={{ fontSize: "11px", color: "#404040", textTransform: "uppercase", letterSpacing: "0.06em" }}>Holdings</span>
         </div>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
@@ -103,28 +115,23 @@ export default function PortfolioPage() {
             </tr>
           </thead>
           <tbody>
-            {!loaded ? (
-              Array.from({ length: 3 }).map((_, i) => (
-                <tr key={i} style={{ borderBottom: "1px solid #1f1f1f" }}>
-                  {Array.from({ length: 5 }).map((_, j) => (
-                    <td key={j} style={{ padding: "14px 20px" }}>
-                      <div className="skeleton" style={{ height: "14px", width: j === 0 ? "80px" : "60px" }} />
-                    </td>
-                  ))}
-                </tr>
-              ))
-            ) : holdings.map((h, i) => (
-              <motion.tr key={h.symbol} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: i * 0.05 }}
-                style={{ borderBottom: "1px solid #1f1f1f", cursor: "default" }}>
+            {!loaded ? Array.from({ length: 3 }).map((_, i) => (
+              <tr key={i} style={{ borderBottom: "1px solid #1f1f1f" }}>
+                {Array.from({ length: 5 }).map((_, j) => (
+                  <td key={j} style={{ padding: "14px 20px" }}>
+                    <div className="skeleton" style={{ height: "14px", width: j === 0 ? "60px" : "80px" }} />
+                  </td>
+                ))}
+              </tr>
+            )) : holdings.map((h, i) => (
+              <motion.tr key={h.symbol} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }}
+                style={{ borderBottom: "1px solid #1f1f1f" }}>
                 <td style={{ padding: "14px 20px", fontSize: "13px", fontWeight: 600, color: "#fff" }}>{h.symbol}</td>
                 <td style={{ padding: "14px 20px", fontSize: "13px", color: "#808080", fontFamily: "monospace" }}>{h.amount}</td>
-                <td style={{ padding: "14px 20px", fontSize: "13px", color: "#fff", fontFamily: "monospace" }}>{loaded ? `$${fmt(h.price)}` : "—"}</td>
-                <td style={{ padding: "14px 20px", fontSize: "13px", color: "#fff", fontFamily: "monospace" }}>{loaded ? `$${fmt(h.value)}` : "—"}</td>
-                <td style={{ padding: "14px 20px" }}>
-                  <span style={{ fontSize: "12px", fontWeight: 500, color: h.pnl >= 0 ? "#0ecb81" : "#f6465d", fontFamily: "monospace" }}>
-                    {h.pnl >= 0 ? "+" : ""}${fmt(h.pnl)} ({h.pnlPercent.toFixed(1)}%)
-                  </span>
+                <td style={{ padding: "14px 20px", fontSize: "13px", color: "#fff", fontFamily: "monospace" }}>${fmt(h.price)}</td>
+                <td style={{ padding: "14px 20px", fontSize: "13px", color: "#fff", fontFamily: "monospace" }}>${fmt(h.value)}</td>
+                <td style={{ padding: "14px 20px", fontSize: "13px", fontWeight: 500, fontFamily: "monospace", color: h.pnl >= 0 ? "#0ecb81" : "#f6465d" }}>
+                  {h.pnl >= 0 ? "+" : ""}${fmt(h.pnl)} ({h.pnlPercent.toFixed(1)}%)
                 </td>
               </motion.tr>
             ))}
@@ -132,10 +139,9 @@ export default function PortfolioPage() {
         </table>
       </div>
 
-      {/* Transaction history */}
       <div>
-        <div style={{ padding: "12px 20px", borderBottom: "1px solid #1f1f1f" }}>
-          <span style={{ fontSize: "12px", fontWeight: 500, color: "#808080", textTransform: "uppercase", letterSpacing: "0.06em" }}>Transaction History</span>
+        <div style={{ padding: "10px 20px", borderBottom: "1px solid #1f1f1f" }}>
+          <span style={{ fontSize: "11px", color: "#404040", textTransform: "uppercase", letterSpacing: "0.06em" }}>Transaction History</span>
         </div>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
@@ -153,7 +159,7 @@ export default function PortfolioPage() {
                 <td style={{ padding: "14px 20px" }}>
                   <span className={tx.type === "buy" ? "tag-green" : "tag-red"}>{tx.type.toUpperCase()}</span>
                 </td>
-                <td style={{ padding: "14px 20px", fontSize: "13px", color: "#fff", fontWeight: 500 }}>{tx.symbol}</td>
+                <td style={{ padding: "14px 20px", fontSize: "13px", fontWeight: 600, color: "#fff" }}>{tx.symbol}</td>
                 <td style={{ padding: "14px 20px", fontSize: "13px", color: "#808080", fontFamily: "monospace" }}>{tx.amount}</td>
                 <td style={{ padding: "14px 20px", fontSize: "13px", color: "#fff", fontFamily: "monospace" }}>${tx.price.toLocaleString()}</td>
                 <td style={{ padding: "14px 20px", fontSize: "12px", color: "#404040" }}>{tx.date}</td>
