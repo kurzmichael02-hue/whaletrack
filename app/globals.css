@@ -92,3 +92,21 @@ body {
     padding: 10px 12px !important;
   }
 }
+
+.desktop-sidebar {
+  display: flex;
+}
+
+@media (max-width: 767px) {
+  .desktop-sidebar {
+    display: none;
+  }
+
+  table {
+    font-size: 11px;
+  }
+
+  th, td {
+    padding: 10px 12px !important;
+  }
+}
