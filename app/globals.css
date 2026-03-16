@@ -83,30 +83,12 @@ body {
   border-radius: 3px;
 }
 
-@media (max-width: 767px) {
-  table {
-    font-size: 11px;
-  }
-  
-  th, td {
-    padding: 10px 12px !important;
-  }
-}
-
-.desktop-sidebar {
-  display: flex;
-}
+.mobile-only { display: none; }
+.desktop-sidebar { display: flex; }
 
 @media (max-width: 767px) {
-  .desktop-sidebar {
-    display: none;
-  }
-
-  table {
-    font-size: 11px;
-  }
-
-  th, td {
-    padding: 10px 12px !important;
-  }
+  .mobile-only { display: flex !important; }
+  .desktop-sidebar { display: none; }
+  table { font-size: 11px; }
+  th, td { padding: 8px 10px !important; }
 }
