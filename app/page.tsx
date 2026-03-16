@@ -2,6 +2,7 @@ import StatsCard from "./components/StatsCard";
 import TokenTable from "./components/TokenTable";
 import PriceChart from "./components/PriceChart";
 import FearGreed from "./components/FearGreed";
+import MarketStats from "./components/MarketStats";
 
 export default function Home() {
   return (
@@ -11,6 +12,7 @@ export default function Home() {
         <StatsCard label="PnL Today" value="+$340.20" positive index={1} />
         <StatsCard label="Open Positions" value="4" index={2} />
       </div>
+      <MarketStats />
       <FearGreed />
       <PriceChart />
       <TokenTable />
