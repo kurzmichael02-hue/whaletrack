@@ -9,8 +9,21 @@ export default function Home() {
   return (
     <div style={{ minHeight: "100vh" }}>
       <LiveStats />
-      <MarketStats />
-      <FearGreed />
+
+      {/* Bento Grid */}
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: "1fr 1fr",
+        borderBottom: "1px solid #1a1a1a",
+      }}>
+        <div style={{ borderRight: "1px solid #1a1a1a" }}>
+          <MarketStats />
+        </div>
+        <div>
+          <FearGreed />
+        </div>
+      </div>
+
       <Trending />
       <PriceChart />
       <TokenTable />

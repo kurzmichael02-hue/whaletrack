@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { motion } from "framer-motion";
+import Sparkline from "./Sparkline";
 
 type Token = {
   symbol: string;
@@ -35,7 +36,7 @@ function MiniBar({ value }: { value: number }) {
   const width = Math.min(Math.abs(value) * 4, 100);
   return (
     <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-      <div style={{ width: "48px", height: "3px", background: "#1f1f1f", borderRadius: "2px", overflow: "hidden", flexShrink: 0 }}>
+      <div style={{ width: "48px", height: "3px", background: "#1a1a1a", borderRadius: "2px", overflow: "hidden", flexShrink: 0 }}>
         <motion.div
           initial={{ width: 0 }}
           animate={{ width: `${width}%` }}
@@ -64,7 +65,6 @@ export default function TokenTable() {
           fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=${t.binance}`).then((r) => r.json())
         )
       );
-
       const newFlash: Record<string, "up" | "down"> = {};
       const updated = results.map((r, i) => {
         const sym = TOKENS[i]!.symbol;
@@ -83,7 +83,6 @@ export default function TokenTable() {
           volume: parseFloat(r.quoteVolume),
         };
       });
-
       setTokens(updated);
       setFlashMap(newFlash);
       setLastUpdate(new Date().toLocaleTimeString());
@@ -109,33 +108,30 @@ export default function TokenTable() {
   };
 
   return (
-    <div style={{ borderTop: "1px solid #1f1f1f" }}>
-      <div style={{ padding: "10px 20px", borderBottom: "1px solid #1f1f1f", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+    <div style={{ borderTop: "1px solid #1a1a1a" }}>
+      <div style={{ padding: "10px 20px", borderBottom: "1px solid #1a1a1a", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <span style={{ fontSize: "11px", color: "#404040", textTransform: "uppercase", letterSpacing: "0.08em" }}>Market Overview</span>
-          <span style={{ width: "5px", height: "5px", borderRadius: "50%", background: "#0ecb81", display: "inline-block" }} />
+          <span style={{ fontSize: "11px", color: "#333", textTransform: "uppercase", letterSpacing: "0.08em" }}>Market Overview</span>
+          <span style={{ width: "5px", height: "5px", borderRadius: "50%", background: "#0ecb81", display: "inline-block", boxShadow: "0 0 6px #0ecb81" }} />
         </div>
-        <span style={{ fontSize: "11px", color: "#2a2a2a", fontVariantNumeric: "tabular-nums" }}>
+        <span style={{ fontSize: "11px", color: "#222", fontVariantNumeric: "tabular-nums" }}>
           Refreshes in {countdown}s · {lastUpdate}
         </span>
       </div>
       <div className="table-scroll">
-        <table style={{ width: "100%", borderCollapse: "collapse", minWidth: "600px" }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", minWidth: "700px" }}>
           <thead>
-            <tr style={{ borderBottom: "1px solid #1f1f1f" }}>
-              <th style={{ padding: "10px 20px", textAlign: "left", fontSize: "11px", color: "#404040", textTransform: "uppercase", letterSpacing: "0.06em", fontWeight: 400 }}>#</th>
-              <th style={{ padding: "10px 20px", textAlign: "left", fontSize: "11px", color: "#404040", textTransform: "uppercase", letterSpacing: "0.06em", fontWeight: 400 }}>Asset</th>
-              <th style={{ padding: "10px 20px", textAlign: "left", fontSize: "11px", color: "#404040", textTransform: "uppercase", letterSpacing: "0.06em", fontWeight: 400 }}>Price</th>
-              <th style={{ padding: "10px 20px", textAlign: "left", fontSize: "11px", color: "#404040", textTransform: "uppercase", letterSpacing: "0.06em", fontWeight: 400 }}>24h</th>
-              <th className="hide-mobile" style={{ padding: "10px 20px", textAlign: "left", fontSize: "11px", color: "#404040", textTransform: "uppercase", letterSpacing: "0.06em", fontWeight: 400 }}>High / Low</th>
-              <th className="hide-mobile" style={{ padding: "10px 20px", textAlign: "left", fontSize: "11px", color: "#404040", textTransform: "uppercase", letterSpacing: "0.06em", fontWeight: 400 }}>Volume</th>
+            <tr style={{ borderBottom: "1px solid #1a1a1a" }}>
+              {["#", "Asset", "Price", "24h", "Last 24h", "High / Low", "Volume"].map((h) => (
+                <th key={h} className={["High / Low", "Volume"].includes(h) ? "hide-mobile" : ""} style={{ padding: "10px 20px", textAlign: "left", fontSize: "11px", color: "#333", textTransform: "uppercase", letterSpacing: "0.06em", fontWeight: 400 }}>{h}</th>
+              ))}
             </tr>
           </thead>
           <tbody>
             {tokens.length === 0 ? (
               Array.from({ length: 8 }).map((_, i) => (
-                <tr key={i} style={{ borderBottom: "1px solid #1f1f1f" }}>
-                  {Array.from({ length: 6 }).map((_, j) => (
+                <tr key={i} style={{ borderBottom: "1px solid #1a1a1a" }}>
+                  {Array.from({ length: 7 }).map((_, j) => (
                     <td key={j} style={{ padding: "14px 20px" }}>
                       <div className="skeleton" style={{ height: "16px", width: j === 1 ? "120px" : "80px" }} />
                     </td>
@@ -152,25 +148,26 @@ export default function TokenTable() {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: i * 0.03, duration: 0.3 }}
                   style={{
-                    borderBottom: "1px solid #1f1f1f",
+                    borderBottom: "1px solid #1a1a1a",
                     background: flash === "up" ? "rgba(14,203,129,0.06)" : flash === "down" ? "rgba(246,70,93,0.06)" : "transparent",
                     transition: "background 0.1s",
                   }}
                 >
-                  <td style={{ padding: "14px 20px", fontSize: "12px", color: "#404040" }}>{i + 1}</td>
+                  <td style={{ padding: "14px 20px", fontSize: "12px", color: "#333" }}>{i + 1}</td>
                   <td style={{ padding: "14px 20px" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                       <div style={{
                         width: "30px", height: "30px", borderRadius: "8px",
                         display: "flex", alignItems: "center", justifyContent: "center",
                         fontSize: "13px", fontWeight: 700,
-                        background: `${meta.color}18`, color: meta.color,
+                        background: `${meta.color}15`, color: meta.color,
+                        border: `1px solid ${meta.color}25`,
                       }}>
                         {meta.icon}
                       </div>
                       <div>
                         <p style={{ fontSize: "13px", fontWeight: 600, color: "#fff" }}>{token.symbol}</p>
-                        <p className="hide-mobile" style={{ fontSize: "11px", color: "#404040" }}>{meta.name}</p>
+                        <p className="hide-mobile" style={{ fontSize: "11px", color: "#333" }}>{meta.name}</p>
                       </div>
                     </div>
                   </td>
@@ -180,12 +177,15 @@ export default function TokenTable() {
                   <td style={{ padding: "14px 20px" }}>
                     <MiniBar value={token.change} />
                   </td>
+                  <td className="hide-mobile" style={{ padding: "8px 20px" }}>
+                    <Sparkline symbol={token.symbol} color={token.change >= 0 ? "#0ecb81" : "#f6465d"} positive={token.change >= 0} />
+                  </td>
                   <td className="hide-mobile" style={{ padding: "14px 20px", fontSize: "12px" }}>
                     <span style={{ color: "#0ecb81" }}>${fmt(token.high)}</span>
-                    <span style={{ color: "#404040", margin: "0 4px" }}>/</span>
+                    <span style={{ color: "#333", margin: "0 4px" }}>/</span>
                     <span style={{ color: "#f6465d" }}>${fmt(token.low)}</span>
                   </td>
-                  <td className="hide-mobile" style={{ padding: "14px 20px", fontSize: "12px", color: "#808080" }}>
+                  <td className="hide-mobile" style={{ padding: "14px 20px", fontSize: "12px", color: "#505050" }}>
                     {fmtVol(token.volume)}
                   </td>
                 </motion.tr>
