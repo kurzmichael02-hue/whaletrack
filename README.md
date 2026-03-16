@@ -4,21 +4,21 @@ My first Web3 project — a crypto dashboard I built to track what the biggest p
 
 ## What it does
 
-- Live prices for 15 tokens with auto-refresh every 15 seconds and a scrolling ticker across all pages
-- TradingView price chart with multiple timeframes and fullscreen mode
-- Market heatmap — all tokens color-coded by 24h performance
-- Fear & Greed Index with 7-day history
-- Global market cap, 24h volume, BTC/ETH dominance
-- ETH gas tracker — slow, normal and fast gas prices in real-time
-- DeFi TVL by chain — top chains ranked by total value locked
-- Trending coins — what's moving right now
-- Token detail modal — click any token for market cap, ATH, supply and more
-- Token search — search any token on Binance directly from the navbar
-- Whale tracker — monitors on-chain transactions from major Ethereum wallets
-- Portfolio tracker — add your own holdings manually or connect wallet for real data
-- Price alerts — set a target price and get a browser notification when it hits
-- Crypto news feed with filtering by token
-- Wallet connectivity via WalletConnect — supports MetaMask, Coinbase and 500+ wallets
+- Live prices for 15 tokens, updates every 15 seconds with a scrolling ticker on every page
+- TradingView chart with multiple timeframes and fullscreen
+- Market heatmap showing which tokens are up or down at a glance
+- Fear & Greed Index with the last 7 days of history
+- Global market cap, 24h volume and BTC/ETH dominance
+- ETH gas tracker with slow, normal and fast prices
+- DeFi TVL broken down by chain
+- Trending coins updated every few minutes
+- Click any token to see market cap, all-time high, circulating supply and more
+- Search any token on Binance right from the navbar
+- Whale tracker pulling real on-chain data from major Ethereum wallets
+- Portfolio tracker — add your holdings manually or connect your wallet for live data
+- Price alerts with browser notifications when a token hits your target
+- Crypto news feed with filtering by Bitcoin, Ethereum and Solana
+- Wallet connect supporting MetaMask, Coinbase and 500+ wallets
 
 ## Architecture
 ```mermaid
