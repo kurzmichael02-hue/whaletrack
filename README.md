@@ -6,15 +6,19 @@ My first Web3 project — a crypto dashboard I built to track what the biggest p
 
 - Live prices for 15 tokens with auto-refresh every 15 seconds and a scrolling ticker across all pages
 - TradingView price chart with multiple timeframes and fullscreen mode
+- Market heatmap — all tokens color-coded by 24h performance
 - Fear & Greed Index with 7-day history
-- Global market cap, 24h volume and BTC/ETH dominance stats
+- Global market cap, 24h volume, BTC/ETH dominance
+- ETH gas tracker — slow, normal and fast gas prices in real-time
+- DeFi TVL by chain — top chains ranked by total value locked
 - Trending coins — what's moving right now
-- Whale tracker — monitors on-chain transactions from major Ethereum wallets like Binance, Vitalik Buterin and Cumberland
-- Portfolio tracker — connect your wallet to see real ETH balance and ERC-20 tokens, or browse a demo portfolio with live PnL
-- Trade history with open/closed filter and PnL tracking
-- Crypto news feed via NewsData.io with filtering by token
+- Token detail modal — click any token for market cap, ATH, supply and more
+- Token search — search any token on Binance directly from the navbar
+- Whale tracker — monitors on-chain transactions from major Ethereum wallets
+- Portfolio tracker — add your own holdings manually or connect wallet for real data
 - Price alerts — set a target price and get a browser notification when it hits
-- Wallet connectivity via WalletConnect / Reown — supports MetaMask, Coinbase and 500+ wallets
+- Crypto news feed with filtering by token
+- Wallet connectivity via WalletConnect — supports MetaMask, Coinbase and 500+ wallets
 
 ## Architecture
 ```mermaid
