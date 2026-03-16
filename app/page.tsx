@@ -10,19 +10,30 @@ import Heatmap from "./components/Heatmap";
 export default function Home() {
   return (
     <div style={{ minHeight: "100vh" }}>
+      {/* Row 1: Portfolio Stats */}
       <LiveStats />
+
+      {/* Row 2: Market Stats — eigene Zeile */}
+      <MarketStats />
+
+      {/* Row 3: Fear & Greed + Gas nebeneinander */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", borderBottom: "1px solid #1a1a1a" }}>
         <div style={{ borderRight: "1px solid #1a1a1a" }}>
-          <MarketStats />
-        </div>
-        <div>
           <FearGreed />
         </div>
+        <GasAndTVL />
       </div>
-      <GasAndTVL />
+
+      {/* Row 4: Heatmap — eigene Zeile */}
       <Heatmap />
+
+      {/* Row 5: Trending */}
       <Trending />
+
+      {/* Row 6: Chart */}
       <PriceChart />
+
+      {/* Row 7: Token Table */}
       <TokenTable />
     </div>
   );

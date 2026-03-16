@@ -69,9 +69,9 @@ export default function GasAndTVL() {
                   />
                 </div>
                 <span style={{ fontSize: "12px", color: "#fff", fontFamily: "monospace", width: "60px", textAlign: "right" }}>{fmtTVL(c.tvl)}</span>
-                <span style={{ fontSize: "11px", color: c.change >= 0 ? "#0ecb81" : "#f6465d", width: "48px", textAlign: "right" }}>
-                  {c.change >= 0 ? "▲" : "▼"}{Math.abs(c.change).toFixed(1)}%
-                </span>
+                <span style={{ fontSize: "11px", color: c.change != null && !isNaN(c.change) ? (c.change >= 0 ? "#0ecb81" : "#f6465d") : "#333", width: "48px", textAlign: "right" }}>
+  {c.change != null && !isNaN(c.change) ? `${c.change >= 0 ? "▲" : "▼"}${Math.abs(c.change).toFixed(1)}%` : "—"}
+</span>
               </motion.div>
             ))}
           </div>

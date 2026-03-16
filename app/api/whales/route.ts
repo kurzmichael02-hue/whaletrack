@@ -5,17 +5,19 @@ const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY;
 const WHALE_WALLETS = [
   { name: "Binance Hot Wallet", address: "0xBE0eB53F46cd790Cd13851d5EFf43D12404d33E8" },
   { name: "Vitalik Buterin", address: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045" },
-  { name: "Cumberland", address: "0x756C4628E57F7e7f8a459EC2752968360Cf4D1AA" },
+  { name: "Wintermute Trading", address: "0xDa9CE944a37d218c3302F6B82a094844C6ECEb17" },
+  { name: "Jump Trading", address: "0x6F1cDbBb4d53d226CF4B917bF768B94acbAB6168" },
+  { name: "Justin Sun", address: "0x3DdfA8eC3052539b6C9549F12cEA2C295cfF5296" },
 ];
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-async function fetchTokenTx(address: string) {
-  await sleep(500);
+async function fetchWhaleTransactions(address: string) {
   try {
+    await sleep(400);
     const res = await fetch(
       `https://api.etherscan.io/v2/api?chainid=1&module=account&action=tokentx&address=${address}&startblock=0&endblock=99999999&page=1&offset=100&sort=desc&apikey=${ETHERSCAN_API_KEY}`,
-      { next: { revalidate: 600 } }
+      { next: { revalidate: 300 } }
     );
     const data = await res.json() as any;
     if (!Array.isArray(data.result)) return [];
@@ -41,17 +43,15 @@ async function fetchTokenTx(address: string) {
           timestamp: new Date(parseInt(tx.timeStamp) * 1000).toISOString(),
         };
       });
-  } catch {
-    return [];
-  }
+  } catch { return []; }
 }
 
 export async function GET() {
   const whales = [];
   for (const wallet of WHALE_WALLETS) {
-    const transactions = await fetchTokenTx(wallet.address);
+    const transactions = await fetchWhaleTransactions(wallet.address);
     whales.push({ name: wallet.name, address: wallet.address, transactions });
-    await sleep(300);
+    await sleep(200);
   }
   return NextResponse.json(whales);
 }
