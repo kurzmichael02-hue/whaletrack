@@ -108,3 +108,23 @@ body {
     -webkit-overflow-scrolling: touch;
   }
 }
+
+/* Glow effects */
+.glow-green {
+  box-shadow: 0 0 8px rgba(14, 203, 129, 0.3);
+}
+
+/* Better scrollbar */
+::-webkit-scrollbar { width: 3px; height: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #222; border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: #333; }
+
+/* Subtle row hover */
+tr:hover td { background: rgba(255,255,255,0.015) !important; }
+
+/* Number font */
+.num {
+  font-family: "JetBrains Mono", "SF Mono", monospace;
+  font-variant-numeric: tabular-nums;
+}
