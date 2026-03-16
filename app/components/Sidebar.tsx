@@ -4,12 +4,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const links = [
-  { href: "/", label: "Dashboard", icon: "⬡" },
-  { href: "/whales", label: "Whales", icon: "🐋" },
-  { href: "/portfolio", label: "Portfolio", icon: "◈" },
-  { href: "/trades", label: "Trades", icon: "⇄" },
-  { href: "/news", label: "News", icon: "◉" },
-  { href: "/settings", label: "Settings", icon: "⚙" },
+  { href: "/", label: "Dashboard" },
+  { href: "/whales", label: "Whales" },
+  { href: "/portfolio", label: "Portfolio" },
+  { href: "/trades", label: "Trades" },
+  { href: "/news", label: "News" },
+  { href: "/settings", label: "Settings" },
 ];
 
 export default function Sidebar() {
@@ -17,55 +17,46 @@ export default function Sidebar() {
 
   return (
     <aside style={{
-      width: "220px",
+      width: "200px",
       minHeight: "100vh",
-      background: "rgba(8, 12, 20, 0.95)",
-      borderRight: "1px solid var(--border)",
+      background: "#0a0a0a",
+      borderRight: "1px solid #1f1f1f",
       display: "flex",
       flexDirection: "column",
-      padding: "24px 12px",
-      gap: "4px",
-      backdropFilter: "blur(20px)",
-      position: "relative",
-      zIndex: 10,
+      flexShrink: 0,
     }}>
-      <div style={{ padding: "0 12px", marginBottom: "32px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <span style={{ fontSize: "22px" }}>🐋</span>
-          <span style={{ color: "var(--text-primary)", fontWeight: 700, fontSize: "16px", letterSpacing: "-0.02em" }}>WhaleTrack</span>
-        </div>
-        <p style={{ color: "var(--text-muted)", fontSize: "11px", marginTop: "4px", marginLeft: "30px" }}>Crypto Intelligence</p>
+      <div style={{ padding: "20px 16px", borderBottom: "1px solid #1f1f1f" }}>
+        <span style={{ fontSize: "13px", fontWeight: 700, letterSpacing: "0.08em", color: "#ffffff" }}>
+          WHALETRACK
+        </span>
       </div>
 
-      <nav style={{ display: "flex", flexDirection: "column", gap: "2px", flex: 1 }}>
+      <nav style={{ padding: "8px 0", flex: 1 }}>
         {links.map((link) => {
           const active = pathname === link.href;
           return (
             <Link key={link.href} href={link.href} style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "10px",
-              padding: "10px 12px",
-              borderRadius: "10px",
+              display: "block",
+              padding: "8px 16px",
               fontSize: "13px",
-              fontWeight: 500,
+              fontWeight: active ? 500 : 400,
+              color: active ? "#ffffff" : "#808080",
               textDecoration: "none",
-              transition: "all 0.15s",
-              background: active ? "var(--accent-dim)" : "transparent",
-              color: active ? "var(--accent)" : "var(--text-secondary)",
-              border: active ? "1px solid var(--accent-border)" : "1px solid transparent",
+              borderLeft: active ? "2px solid #0ecb81" : "2px solid transparent",
+              background: active ? "rgba(255,255,255,0.03)" : "transparent",
+              transition: "all 0.1s",
             }}>
-              <span style={{ fontSize: "14px" }}>{link.icon}</span>
-              <span>{link.label}</span>
-              {active && <span style={{ marginLeft: "auto", width: "5px", height: "5px", borderRadius: "50%", background: "var(--accent)" }} />}
+              {link.label}
             </Link>
           );
         })}
       </nav>
 
-      <div style={{ padding: "12px", borderRadius: "12px", background: "var(--accent-dim)", border: "1px solid var(--accent-border)" }}>
-        <p style={{ color: "var(--accent)", fontSize: "11px", fontWeight: 600 }}>● Live</p>
-        <p style={{ color: "var(--text-muted)", fontSize: "11px", marginTop: "2px" }}>Real-time data active</p>
+      <div style={{ padding: "12px 16px", borderTop: "1px solid #1f1f1f" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+          <span style={{ width: "5px", height: "5px", borderRadius: "50%", background: "#0ecb81", display: "inline-block" }} />
+          <span style={{ fontSize: "11px", color: "#404040" }}>Live</span>
+        </div>
       </div>
     </aside>
   );

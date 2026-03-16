@@ -13,7 +13,7 @@ declare global {
 
 const PAGE_TITLES: Record<string, string> = {
   "/": "Dashboard",
-  "/whales": "Whale Tracker",
+  "/whales": "Whales",
   "/portfolio": "Portfolio",
   "/trades": "Trades",
   "/news": "News",
@@ -22,23 +22,23 @@ const PAGE_TITLES: Record<string, string> = {
 
 export default function Navbar() {
   const pathname = usePathname();
-  const title = PAGE_TITLES[pathname] ?? "WhaleTrack";
 
   return (
     <header style={{
-      height: "60px",
+      height: "48px",
+      borderBottom: "1px solid var(--border)",
       display: "flex",
       alignItems: "center",
       justifyContent: "space-between",
-      padding: "0 24px",
-      borderBottom: "1px solid var(--border)",
-      background: "rgba(8, 12, 20, 0.8)",
-      backdropFilter: "blur(20px)",
+      padding: "0 20px",
+      background: "var(--bg)",
       position: "sticky",
       top: 0,
-      zIndex: 20,
+      zIndex: 50,
     }}>
-      <h2 style={{ color: "var(--text-primary)", fontSize: "16px", fontWeight: 600, letterSpacing: "-0.02em" }}>{title}</h2>
+      <span style={{ fontSize: "13px", fontWeight: 500, color: "var(--text-2)" }}>
+        {PAGE_TITLES[pathname] ?? "WhaleTrack"}
+      </span>
       <appkit-button />
     </header>
   );
