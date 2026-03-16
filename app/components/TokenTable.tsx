@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { motion } from "framer-motion";
 import Sparkline from "./Sparkline";
+import TokenDetail from "./TokenDetail";
 
 type Token = {
   symbol: string;
@@ -56,6 +57,7 @@ export default function TokenTable() {
   const [lastUpdate, setLastUpdate] = useState<string>("");
   const [countdown, setCountdown] = useState(15);
   const [flashMap, setFlashMap] = useState<Record<string, "up" | "down">>({});
+  const [selectedToken, setSelectedToken] = useState<string | null>(null);
   const prevRef = useRef<Record<string, number>>({});
 
   async function fetchPrices() {
@@ -108,92 +110,96 @@ export default function TokenTable() {
   };
 
   return (
-    <div style={{ borderTop: "1px solid #1a1a1a" }}>
-      <div style={{ padding: "10px 20px", borderBottom: "1px solid #1a1a1a", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <span style={{ fontSize: "11px", color: "#333", textTransform: "uppercase", letterSpacing: "0.08em" }}>Market Overview</span>
-          <span style={{ width: "5px", height: "5px", borderRadius: "50%", background: "#0ecb81", display: "inline-block", boxShadow: "0 0 6px #0ecb81" }} />
+    <>
+      <TokenDetail symbol={selectedToken} onClose={() => setSelectedToken(null)} />
+      <div style={{ borderTop: "1px solid #1a1a1a" }}>
+        <div style={{ padding: "10px 20px", borderBottom: "1px solid #1a1a1a", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <span style={{ fontSize: "11px", color: "#333", textTransform: "uppercase", letterSpacing: "0.08em" }}>Market Overview</span>
+            <span style={{ width: "5px", height: "5px", borderRadius: "50%", background: "#0ecb81", display: "inline-block", boxShadow: "0 0 6px #0ecb81" }} />
+          </div>
+          <span style={{ fontSize: "11px", color: "#222", fontVariantNumeric: "tabular-nums" }}>
+            Refreshes in {countdown}s · {lastUpdate}
+          </span>
         </div>
-        <span style={{ fontSize: "11px", color: "#222", fontVariantNumeric: "tabular-nums" }}>
-          Refreshes in {countdown}s · {lastUpdate}
-        </span>
-      </div>
-      <div className="table-scroll">
-        <table style={{ width: "100%", borderCollapse: "collapse", minWidth: "700px" }}>
-          <thead>
-            <tr style={{ borderBottom: "1px solid #1a1a1a" }}>
-              {["#", "Asset", "Price", "24h", "Last 24h", "High / Low", "Volume"].map((h) => (
-                <th key={h} className={["High / Low", "Volume"].includes(h) ? "hide-mobile" : ""} style={{ padding: "10px 20px", textAlign: "left", fontSize: "11px", color: "#333", textTransform: "uppercase", letterSpacing: "0.06em", fontWeight: 400 }}>{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {tokens.length === 0 ? (
-              Array.from({ length: 8 }).map((_, i) => (
-                <tr key={i} style={{ borderBottom: "1px solid #1a1a1a" }}>
-                  {Array.from({ length: 7 }).map((_, j) => (
-                    <td key={j} style={{ padding: "14px 20px" }}>
-                      <div className="skeleton" style={{ height: "16px", width: j === 1 ? "120px" : "80px" }} />
+        <div className="table-scroll">
+          <table style={{ width: "100%", borderCollapse: "collapse", minWidth: "700px" }}>
+            <thead>
+              <tr style={{ borderBottom: "1px solid #1a1a1a" }}>
+                {["#", "Asset", "Price", "24h", "Last 24h", "High / Low", "Volume"].map((h) => (
+                  <th key={h} className={["High / Low", "Volume"].includes(h) ? "hide-mobile" : ""} style={{ padding: "10px 20px", textAlign: "left", fontSize: "11px", color: "#333", textTransform: "uppercase", letterSpacing: "0.06em", fontWeight: 400 }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {tokens.length === 0 ? (
+                Array.from({ length: 8 }).map((_, i) => (
+                  <tr key={i} style={{ borderBottom: "1px solid #1a1a1a" }}>
+                    {Array.from({ length: 7 }).map((_, j) => (
+                      <td key={j} style={{ padding: "14px 20px" }}>
+                        <div className="skeleton" style={{ height: "16px", width: j === 1 ? "120px" : "80px" }} />
+                      </td>
+                    ))}
+                  </tr>
+                ))
+              ) : tokens.map((token, i) => {
+                const meta = TOKENS[i]!;
+                const flash = flashMap[token.symbol];
+                return (
+                  <motion.tr
+                    key={token.symbol}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.03, duration: 0.3 }}
+                    onClick={() => setSelectedToken(token.symbol)}
+                    style={{
+                      borderBottom: "1px solid #1a1a1a", cursor: "pointer",
+                      background: flash === "up" ? "rgba(14,203,129,0.06)" : flash === "down" ? "rgba(246,70,93,0.06)" : "transparent",
+                      transition: "background 0.1s",
+                    }}
+                  >
+                    <td style={{ padding: "14px 20px", fontSize: "12px", color: "#333" }}>{i + 1}</td>
+                    <td style={{ padding: "14px 20px" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                        <div style={{
+                          width: "30px", height: "30px", borderRadius: "8px",
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          fontSize: "13px", fontWeight: 700,
+                          background: `${meta.color}15`, color: meta.color,
+                          border: `1px solid ${meta.color}25`,
+                        }}>
+                          {meta.icon}
+                        </div>
+                        <div>
+                          <p style={{ fontSize: "13px", fontWeight: 600, color: "#fff" }}>{token.symbol}</p>
+                          <p className="hide-mobile" style={{ fontSize: "11px", color: "#333" }}>{meta.name}</p>
+                        </div>
+                      </div>
                     </td>
-                  ))}
-                </tr>
-              ))
-            ) : tokens.map((token, i) => {
-              const meta = TOKENS[i]!;
-              const flash = flashMap[token.symbol];
-              return (
-                <motion.tr
-                  key={token.symbol}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.03, duration: 0.3 }}
-                  style={{
-                    borderBottom: "1px solid #1a1a1a",
-                    background: flash === "up" ? "rgba(14,203,129,0.06)" : flash === "down" ? "rgba(246,70,93,0.06)" : "transparent",
-                    transition: "background 0.1s",
-                  }}
-                >
-                  <td style={{ padding: "14px 20px", fontSize: "12px", color: "#333" }}>{i + 1}</td>
-                  <td style={{ padding: "14px 20px" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                      <div style={{
-                        width: "30px", height: "30px", borderRadius: "8px",
-                        display: "flex", alignItems: "center", justifyContent: "center",
-                        fontSize: "13px", fontWeight: 700,
-                        background: `${meta.color}15`, color: meta.color,
-                        border: `1px solid ${meta.color}25`,
-                      }}>
-                        {meta.icon}
-                      </div>
-                      <div>
-                        <p style={{ fontSize: "13px", fontWeight: 600, color: "#fff" }}>{token.symbol}</p>
-                        <p className="hide-mobile" style={{ fontSize: "11px", color: "#333" }}>{meta.name}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td style={{ padding: "14px 20px", fontSize: "13px", fontWeight: 600, color: "#fff", fontVariantNumeric: "tabular-nums" }}>
-                    {token.price > 0 ? `$${fmt(token.price)}` : "—"}
-                  </td>
-                  <td style={{ padding: "14px 20px" }}>
-                    <MiniBar value={token.change} />
-                  </td>
-                  <td className="hide-mobile" style={{ padding: "8px 20px" }}>
-                    <Sparkline symbol={token.symbol} color={token.change >= 0 ? "#0ecb81" : "#f6465d"} positive={token.change >= 0} />
-                  </td>
-                  <td className="hide-mobile" style={{ padding: "14px 20px", fontSize: "12px" }}>
-                    <span style={{ color: "#0ecb81" }}>${fmt(token.high)}</span>
-                    <span style={{ color: "#333", margin: "0 4px" }}>/</span>
-                    <span style={{ color: "#f6465d" }}>${fmt(token.low)}</span>
-                  </td>
-                  <td className="hide-mobile" style={{ padding: "14px 20px", fontSize: "12px", color: "#505050" }}>
-                    {fmtVol(token.volume)}
-                  </td>
-                </motion.tr>
-              );
-            })}
-          </tbody>
-        </table>
+                    <td style={{ padding: "14px 20px", fontSize: "13px", fontWeight: 600, color: "#fff", fontVariantNumeric: "tabular-nums" }}>
+                      {token.price > 0 ? `$${fmt(token.price)}` : "—"}
+                    </td>
+                    <td style={{ padding: "14px 20px" }}>
+                      <MiniBar value={token.change} />
+                    </td>
+                    <td className="hide-mobile" style={{ padding: "8px 20px" }}>
+                      <Sparkline symbol={token.symbol} color={token.change >= 0 ? "#0ecb81" : "#f6465d"} positive={token.change >= 0} />
+                    </td>
+                    <td className="hide-mobile" style={{ padding: "14px 20px", fontSize: "12px" }}>
+                      <span style={{ color: "#0ecb81" }}>${fmt(token.high)}</span>
+                      <span style={{ color: "#333", margin: "0 4px" }}>/</span>
+                      <span style={{ color: "#f6465d" }}>${fmt(token.low)}</span>
+                    </td>
+                    <td className="hide-mobile" style={{ padding: "14px 20px", fontSize: "12px", color: "#505050" }}>
+                      {fmtVol(token.volume)}
+                    </td>
+                  </motion.tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
