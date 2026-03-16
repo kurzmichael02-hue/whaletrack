@@ -4,6 +4,7 @@ import "./globals.css";
 import AppKitProvider from "./context";
 import Sidebar from "./components/Sidebar";
 import Navbar from "./components/Navbar";
+import Ticker from "./components/Ticker";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,6 +22,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <Sidebar />
             <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
               <Navbar />
+              <Ticker />
               <main style={{ flex: 1, overflowY: "auto" }}>
                 {children}
               </main>
