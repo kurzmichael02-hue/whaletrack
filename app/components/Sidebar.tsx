@@ -8,9 +8,11 @@ const links = [
   { href: "/whales", label: "Whales" },
   { href: "/portfolio", label: "Portfolio" },
   { href: "/trades", label: "Trades" },
+  { href: "/alerts", label: "Alerts" },
   { href: "/news", label: "News" },
   { href: "/settings", label: "Settings" },
 ];
+
 
 export default function Sidebar() {
   const pathname = usePathname();
