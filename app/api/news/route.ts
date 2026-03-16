@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
   const res = await fetch(
-    "https://cryptopanic.com/api/free/v1/posts/?auth_token=free&public=true&kind=news",
+    `https://newsdata.io/api/1/news?apikey=${process.env.NEWSDATA_API_KEY}&q=crypto&language=en&category=business,technology`,
     { next: { revalidate: 300 } }
   );
   const data = await res.json();
