@@ -4,6 +4,7 @@ import { useAccount } from "wagmi";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import WalletDashboard from "../components/WalletDashboard";
+import PortfolioChart from "../components/PortfolioChart";
 
 type Holding = {
   id: string;
@@ -11,11 +12,6 @@ type Holding = {
   amount: number;
   buyPrice: number;
   buyDate: string;
-};
-
-type LivePrice = {
-  symbol: string;
-  price: number;
 };
 
 export default function PortfolioPage() {
@@ -34,13 +30,11 @@ function ManualPortfolio() {
   const [buyDate, setBuyDate] = useState(new Date().toISOString().split("T")[0]!);
   const [symbolPrice, setSymbolPrice] = useState<number | null>(null);
 
-  // Load from localStorage
   useEffect(() => {
     const saved = localStorage.getItem("whaletrack_portfolio");
     if (saved) setHoldings(JSON.parse(saved));
   }, []);
 
-  // Fetch live prices for all holdings
   useEffect(() => {
     if (holdings.length === 0) return;
     const symbols = [...new Set(holdings.map((h) => h.symbol))];
@@ -58,7 +52,6 @@ function ManualPortfolio() {
     });
   }, [holdings]);
 
-  // Fetch price when symbol changes
   useEffect(() => {
     if (!symbol || symbol.length < 2) { setSymbolPrice(null); return; }
     const timeout = setTimeout(() => {
@@ -91,10 +84,6 @@ function ManualPortfolio() {
     localStorage.setItem("whaletrack_portfolio", JSON.stringify(updated));
   }
 
-  function useCurrentPrice() {
-    if (symbolPrice) setBuyPrice(symbolPrice.toString());
-  }
-
   const fmt = (n: number) => n.toLocaleString(undefined, { maximumFractionDigits: 2 });
 
   const enriched = holdings.map((h) => {
@@ -113,7 +102,6 @@ function ManualPortfolio() {
 
   return (
     <div style={{ minHeight: "100vh" }}>
-      {/* Stats */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", borderBottom: "1px solid #1a1a1a" }}>
         {[
           { label: "Total Value", value: holdings.length > 0 ? `$${fmt(totalValue)}` : "—", green: false },
@@ -129,7 +117,8 @@ function ManualPortfolio() {
         ))}
       </div>
 
-      {/* Header */}
+      <PortfolioChart holdings={holdings} />
+
       <div style={{ padding: "12px 20px", borderBottom: "1px solid #1a1a1a", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <span style={{ fontSize: "11px", color: "#333", textTransform: "uppercase", letterSpacing: "0.08em" }}>
           Holdings ({holdings.length})
@@ -145,7 +134,6 @@ function ManualPortfolio() {
         </button>
       </div>
 
-      {/* Add form */}
       <AnimatePresence>
         {showAdd && (
           <motion.div
@@ -161,7 +149,7 @@ function ManualPortfolio() {
                   placeholder="BTC" style={inputStyle} />
                 {symbolPrice && (
                   <p style={{ fontSize: "10px", color: "#0ecb81", marginTop: "4px", cursor: "pointer" }}
-                    onClick={useCurrentPrice}>
+                    onClick={() => setBuyPrice(symbolPrice.toString())}>
                     Current: ${fmt(symbolPrice)} — click to use
                   </p>
                 )}
@@ -194,7 +182,6 @@ function ManualPortfolio() {
         )}
       </AnimatePresence>
 
-      {/* Holdings table */}
       {holdings.length === 0 ? (
         <div style={{ padding: "60px 20px", textAlign: "center" }}>
           <p style={{ fontSize: "13px", color: "#333", marginBottom: "8px" }}>No holdings yet</p>
