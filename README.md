@@ -1,8 +1,18 @@
 <div align="center">
-  <img src="docs/banner.svg" alt="WhaleTrack" width="100%"/>
-</div>
 
-# WhaleTrack
+# WHALETRACK
+
+**Crypto Intelligence Dashboard**
+
+[![Next.js](https://img.shields.io/badge/Next.js-14-black?style=flat-square&logo=next.js)](https://nextjs.org)
+[![TypeScript](https://img.shields.io/badge/TypeScript-blue?style=flat-square&logo=typescript&logoColor=white)](https://typescriptlang.org)
+[![Vercel](https://img.shields.io/badge/Deployed-Vercel-black?style=flat-square&logo=vercel)](https://whaletrack-ashen.vercel.app)
+[![TailwindCSS](https://img.shields.io/badge/TailwindCSS-38B2AC?style=flat-square&logo=tailwind-css&logoColor=white)](https://tailwindcss.com)
+[![Web3](https://img.shields.io/badge/Web3-WalletConnect-blue?style=flat-square&logo=ethereum)](https://reown.com)
+
+**[Live Demo →](https://whaletrack-ashen.vercel.app)**
+
+</div>
 
 My first Web3 project — a crypto dashboard I built to track what the biggest players in the market are doing in real-time. Started as a simple price tracker and grew into a full dashboard with live market data, on-chain whale monitoring, wallet connectivity and more.
 
