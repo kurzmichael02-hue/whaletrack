@@ -22,6 +22,7 @@ const links = [
   { href: "/trades", label: "Trades", icon: "⇅" },
   { href: "/alerts", label: "Alerts", icon: "◉" },
   { href: "/news", label: "News", icon: "≡" },
+  { href: "/converter", label: "Tools", icon: "⊕" },
   { href: "/settings", label: "Settings", icon: "⊙" },
 ];
 

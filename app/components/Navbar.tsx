@@ -23,6 +23,7 @@ const PAGE_TITLES: Record<string, string> = {
   "/alerts": "Alerts",
   "/news": "News",
   "/settings": "Settings",
+  "/converter": "Tools",
 };
 
 export default function Navbar() {
