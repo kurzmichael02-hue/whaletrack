@@ -18,6 +18,7 @@ const links = [
   { href: "/", label: "Dashboard", icon: "▪" },
   { href: "/whales", label: "Whales", icon: "◈" },
   { href: "/portfolio", label: "Portfolio", icon: "◎" },
+  { href: "/wallets", label: "Wallets", icon: "⬡" },
   { href: "/trades", label: "Trades", icon: "⇅" },
   { href: "/alerts", label: "Alerts", icon: "◉" },
   { href: "/news", label: "News", icon: "≡" },
