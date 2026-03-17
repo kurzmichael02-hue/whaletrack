@@ -1,3 +1,7 @@
+<div align="center">
+  <img src="docs/banner.svg" alt="WhaleTrack" width="100%"/>
+</div>
+
 # WhaleTrack
 
 My first Web3 project — a crypto dashboard I built to track what the biggest players in the market are doing in real-time. Started as a simple price tracker and grew into a full dashboard with live market data, on-chain whale monitoring, wallet connectivity and more.
