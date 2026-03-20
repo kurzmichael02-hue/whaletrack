@@ -148,5 +148,4 @@ whaletrack/
 ```
 
 ## Status
-
-Work in progress. More features coming.
+Live and deployed at [whaletrack-ashen.vercel.app](https://whaletrack-ashen.vercel.app)
