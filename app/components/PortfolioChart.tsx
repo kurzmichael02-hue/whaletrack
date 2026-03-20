@@ -26,23 +26,41 @@ export default function PortfolioChart({ holdings }: { holdings: Holding[] }) {
   const [data, setData] = useState<DataPoint[]>([]);
   const [loading, setLoading] = useState(false);
   const [range, setRange] = useState("30");
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     if (holdings.length === 0) return;
     setLoading(true);
+    setError(false);
 
     async function load() {
       try {
-        const results = await Promise.all(
-          holdings.map((h) => {
-            const id = COINGECKO_IDS[h.symbol] ?? h.symbol.toLowerCase();
-            return fetch(`https://api.coingecko.com/api/v3/coins/${id}/market_chart?vs_currency=usd&days=${range}`)
-              .then((r) => r.json())
-              .then((d) => ({ symbol: h.symbol, amount: h.amount, prices: d.prices ?? [] }));
-          })
-        );
+        const results: { symbol: string; amount: number; prices: [number, number][] }[] = [];
+        for (let i = 0; i < holdings.length; i++) {
+          const h = holdings[i]!;
+          const id = COINGECKO_IDS[h.symbol] ?? h.symbol.toLowerCase();
+          try {
+            const res = await fetch(
+              `https://api.coingecko.com/api/v3/coins/${id}/market_chart?vs_currency=usd&days=${range}`
+            );
+            if (res.status === 429) {
+              await new Promise((r) => setTimeout(r, 2000));
+              i--;
+              continue;
+            }
+            const d = await res.json();
+            results.push({ symbol: h.symbol, amount: h.amount, prices: d.prices ?? [] });
+          } catch {
+            results.push({ symbol: h.symbol, amount: h.amount, prices: [] });
+          }
+          if (i < holdings.length - 1) await new Promise((r) => setTimeout(r, 600));
+        }
 
-        if (results[0]?.prices.length === 0) { setLoading(false); return; }
+        if (!results[0]?.prices.length) {
+          setError(true);
+          setLoading(false);
+          return;
+        }
 
         const points = results[0]!.prices.map(([timestamp]: [number, number], i: number) => {
           const totalValue = results.reduce((sum, r) => {
@@ -56,7 +74,9 @@ export default function PortfolioChart({ holdings }: { holdings: Holding[] }) {
         });
 
         setData(points);
-      } catch (e) { console.error(e); }
+      } catch {
+        setError(true);
+      }
       setLoading(false);
     }
 
@@ -113,6 +133,10 @@ export default function PortfolioChart({ holdings }: { holdings: Holding[] }) {
       <div style={{ padding: "16px 20px 8px" }}>
         {loading ? (
           <div className="skeleton" style={{ height: "120px", borderRadius: "4px" }} />
+        ) : error ? (
+          <div style={{ height: "120px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <p style={{ fontSize: "12px", color: "#333" }}>Chart unavailable — try again in a moment</p>
+          </div>
         ) : data.length > 1 ? (
           <svg width="100%" viewBox={`0 0 ${w} ${h}`} style={{ overflow: "visible" }}>
             <defs>

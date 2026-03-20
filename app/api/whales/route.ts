@@ -17,41 +17,76 @@ const WHALE_WALLETS = [
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-async function fetchWhaleTransactions(address: string) {
-  try {
-    await sleep(300);
-    const res = await fetch(
-      `https://api.etherscan.io/v2/api?chainid=1&module=account&action=tokentx&address=${address}&startblock=0&endblock=99999999&page=1&offset=100&sort=desc&apikey=${ETHERSCAN_API_KEY}`,
-      { next: { revalidate: 300 } }
-    );
-    const data = await res.json() as any;
-    if (!Array.isArray(data.result)) return [];
-    return data.result
-      .filter((tx: any) => {
-        const decimals = parseInt(tx.tokenDecimal) || 18;
-        const amount = parseFloat(tx.value) / Math.pow(10, decimals);
-        return ["USDT", "USDC", "WETH", "WBTC", "DAI"].includes(tx.tokenSymbol) && amount >= 1000;
-      })
-      .slice(0, 6)
-      .map((tx: any) => {
-        const decimals = parseInt(tx.tokenDecimal) || 18;
-        const amount = parseFloat(tx.value) / Math.pow(10, decimals);
-        return {
-          hash: tx.hash,
-          token: tx.tokenSymbol,
-          value: amount >= 1_000_000 ? `${(amount / 1_000_000).toFixed(2)}M` : amount >= 1_000 ? `${(amount / 1_000).toFixed(1)}K` : amount.toFixed(2),
-          timestamp: new Date(parseInt(tx.timeStamp) * 1000).toISOString(),
-        };
-      });
-  } catch { return []; }
+async function fetchWithRetry(url: string, retries = 3): Promise<any> {
+  for (let i = 0; i < retries; i++) {
+    try {
+      const res = await fetch(url, { next: { revalidate: 300 } });
+      const data = await res.json();
+      if (data.status === "0" && data.message === "Max rate limit reached") {
+        await sleep(1000 * (i + 1));
+        continue;
+      }
+      return data;
+    } catch {
+      await sleep(500 * (i + 1));
+    }
+  }
+  return { result: [] };
+}
+
+async function fetchWhaleTransactions(address: string, index: number) {
+  await sleep(index * 250);
+  const data = await fetchWithRetry(
+    `https://api.etherscan.io/v2/api?chainid=1&module=account&action=tokentx&address=${address}&startblock=0&endblock=99999999&page=1&offset=100&sort=desc&apikey=${ETHERSCAN_API_KEY}`
+  );
+
+  if (!Array.isArray(data.result)) return [];
+
+  return data.result
+    .filter((tx: any) => {
+      const decimals = parseInt(tx.tokenDecimal) || 18;
+      const amount = parseFloat(tx.value) / Math.pow(10, decimals);
+      return ["USDT", "USDC", "WETH", "WBTC", "DAI"].includes(tx.tokenSymbol) && amount >= 1000;
+    })
+    .slice(0, 6)
+    .map((tx: any) => {
+      const decimals = parseInt(tx.tokenDecimal) || 18;
+      const amount = parseFloat(tx.value) / Math.pow(10, decimals);
+      return {
+        hash: tx.hash,
+        token: tx.tokenSymbol,
+        value: amount >= 1_000_000
+          ? `${(amount / 1_000_000).toFixed(2)}M`
+          : amount >= 1_000
+          ? `${(amount / 1_000).toFixed(1)}K`
+          : amount.toFixed(2),
+        timestamp: new Date(parseInt(tx.timeStamp) * 1000).toISOString(),
+      };
+    });
 }
 
 export async function GET() {
-  const whales = [];
-  for (const wallet of WHALE_WALLETS) {
-    const transactions = await fetchWhaleTransactions(wallet.address);
-    whales.push({ name: wallet.name, address: wallet.address, category: wallet.category, transactions });
-    await sleep(200);
-  }
+  const results = await Promise.allSettled(
+    WHALE_WALLETS.map((wallet, i) =>
+      fetchWhaleTransactions(wallet.address, i).then((transactions) => ({
+        name: wallet.name,
+        address: wallet.address,
+        category: wallet.category,
+        transactions,
+      }))
+    )
+  );
+
+  const whales = results.map((r, i) =>
+    r.status === "fulfilled"
+      ? r.value
+      : {
+          name: WHALE_WALLETS[i]!.name,
+          address: WHALE_WALLETS[i]!.address,
+          category: WHALE_WALLETS[i]!.category,
+          transactions: [],
+        }
+  );
+
   return NextResponse.json(whales);
 }

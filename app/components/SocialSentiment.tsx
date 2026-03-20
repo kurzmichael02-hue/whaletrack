@@ -22,14 +22,20 @@ export default function SocialSentiment() {
   const [selected, setSelected] = useState("BTC");
   const [data, setData] = useState<Sentiment | null>(null);
   const [loading, setLoading] = useState(false);
+  const [rateLimited, setRateLimited] = useState(false);
 
   useEffect(() => {
     setLoading(true);
     setData(null);
+    setRateLimited(false);
     const id = COINGECKO_IDS[selected] ?? selected.toLowerCase();
     fetch(`/api/sentiment?symbol=${id}`)
-      .then((r) => r.json())
-      .then((d) => { setData(d); setLoading(false); });
+      .then((r) => {
+        if (r.status === 429) { setRateLimited(true); throw new Error("rate_limit"); }
+        return r.json();
+      })
+      .then((d) => { setData(d); setLoading(false); })
+      .catch(() => setLoading(false));
   }, [selected]);
 
   const fmtNum = (n: number) => {
@@ -57,10 +63,14 @@ export default function SocialSentiment() {
 
       <div style={{ padding: "16px 20px" }}>
         {loading ? (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "12px" }}>
-            {Array.from({ length: 4 }).map((_, i) => (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "12px" }}>
+            {Array.from({ length: 3 }).map((_, i) => (
               <div key={i} className="skeleton" style={{ height: "60px", borderRadius: "4px" }} />
             ))}
+          </div>
+        ) : rateLimited ? (
+          <div style={{ padding: "20px", textAlign: "center" }}>
+            <p style={{ fontSize: "12px", color: "#333" }}>Rate limited — try again in a moment</p>
           </div>
         ) : data ? (
           <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
@@ -76,22 +86,13 @@ export default function SocialSentiment() {
                 </div>
               ))}
             </div>
-
             <div>
               <p style={{ fontSize: "11px", color: "#333", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "8px" }}>Community Sentiment</p>
               <div style={{ display: "flex", height: "8px", borderRadius: "4px", overflow: "hidden", background: "#1a1a1a" }}>
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: `${data.sentiment_votes_up}%` }}
-                  transition={{ duration: 0.8 }}
-                  style={{ background: "#0ecb81", height: "100%" }}
-                />
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: `${data.sentiment_votes_down}%` }}
-                  transition={{ duration: 0.8, delay: 0.1 }}
-                  style={{ background: "#f6465d", height: "100%" }}
-                />
+                <motion.div initial={{ width: 0 }} animate={{ width: `${data.sentiment_votes_up}%` }} transition={{ duration: 0.8 }}
+                  style={{ background: "#0ecb81", height: "100%" }} />
+                <motion.div initial={{ width: 0 }} animate={{ width: `${data.sentiment_votes_down}%` }} transition={{ duration: 0.8, delay: 0.1 }}
+                  style={{ background: "#f6465d", height: "100%" }} />
               </div>
               <div style={{ display: "flex", justifyContent: "space-between", marginTop: "6px" }}>
                 <span style={{ fontSize: "11px", color: "#0ecb81" }}>▲ Bullish {data.sentiment_votes_up.toFixed(1)}%</span>
@@ -100,7 +101,9 @@ export default function SocialSentiment() {
             </div>
           </div>
         ) : (
-          <p style={{ fontSize: "12px", color: "#333" }}>No sentiment data available</p>
+          <div style={{ padding: "20px", textAlign: "center" }}>
+            <p style={{ fontSize: "12px", color: "#333" }}>No sentiment data available</p>
+          </div>
         )}
       </div>
     </div>
